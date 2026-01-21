@@ -1,0 +1,80 @@
+############################################
+# LEIA AQUI                                
+############################################
+# Criado por GUILHERME LAZAROTTO           
+# Youtube: www.youtube.com/@guilherme_laz  
+# Curso completo: www.curson8n.com.br      
+############################################
+
+services:
+  redis:
+    image: redis:latest
+    platform: linux/amd64
+    command: redis-server --requirepass default
+    environment:
+      REDIS_USER: default
+      REDIS_PASSWORD: default
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:latest
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: default
+      POSTGRES_DB: default
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  waha:
+    image: devlikeapro/waha:latest
+    platform: linux/amd64
+    environment:
+      WHATSAPP_HOOK_URL: https://nonresidential-commemoratively-amal.ngrok-free.dev:5678/webhook/webhook
+      WHATSAPP_DEFAULT_ENGINE: GOWS
+      WHATSAPP_HOOK_EVENTS: message
+      WAHA_NO_API_KEY: true
+      WAHA_DASHBOARD_NO_PASSWORD: true
+      WHATSAPP_SWAGGER_NO_PASSWORD: true
+    volumes:
+      - waha_sessions:/app/.sessions
+      - waha_media:/app/.media
+    ports:
+      - "3000:3000"
+
+  scraper:
+    build: ./scraper
+    container_name: scraper
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    platform: linux/amd64
+    ports:
+      - "5678:5678"
+    environment:
+      - WEBHOOK_URL=https://nonresidential-commemoratively-amal.ngrok-free.dev
+      - N8N_HOST=nonresidential-commemoratively-amal.ngrok-free.dev
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - N8N_LOG_LEVEL=debug
+      - N8N_SECURE_COOKIE=false
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - scraper
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  waha_sessions:
+  waha_media:
+  n8n_data:
