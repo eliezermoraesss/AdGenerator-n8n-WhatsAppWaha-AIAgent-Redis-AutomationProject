@@ -24,18 +24,6 @@ def normalize_price_from_aria(label: str):
         return f"R$ {numbers[0]},00"
     return f"R$ {numbers[0]},{numbers[1]}"
 
-def download_and_convert_image(url: str):
-    ext = os.path.splitext(urlparse(url).path)[1].lower()
-    if ext not in [".jpg", ".jpeg", ".png"]:
-        ext = ".jpg"
-
-    filename = f"/tmp/image{ext}"
-    r = requests.get(url, timeout=30)
-    with open(filename, "wb") as f:
-        f.write(r.content)
-
-    return filename
-
 @app.post("/scrape")
 def scrape(data: dict):
     url = data.get("url")
@@ -143,15 +131,10 @@ def scrape(data: dict):
 
         browser.close()
 
-        imagem_local = None
-        if imagem_url:
-            imagem_local = download_and_convert_image(imagem_url)
-
         return {
             "titulo": titulo,
             "preco_atual": preco_atual,
             "preco_anterior": preco_anterior,
             "imagem_url": imagem_url,
-            "imagem_local": imagem_local,
             "url": url
         }
