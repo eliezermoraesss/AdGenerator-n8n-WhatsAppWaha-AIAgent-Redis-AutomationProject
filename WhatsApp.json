@@ -146,7 +146,7 @@
         "promptType": "define",
         "text": "={{ $json.titulo }} {{ $json.preco_atual }}{{ $json.url }}{{ $json.preco_anterior }}",
         "options": {
-          "systemMessage": "Você é um formatador de mensagens para ofertas.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza.\n\nProduto: {{ $json.titulo }}\nPreço atual: {{ $json.preco_atual }}\nPreço anterior: {{ $json.preco_anterior }}\nLink: {{ $json.url }}\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (se existir, tachado)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: \n{{Link}}\n\nRetorne SOMENTE a mensagem formatada."
+          "systemMessage": "Você é um formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza.\n\nProduto: {{ $json.titulo }}\nPreço atual: {{ $json.preco_atual }}\nPreço anterior: {{ $json.preco_anterior }}\nLink: {{ $json.url }}\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{{Produto}} (negrito, certifique-se que não tenha dois asteriscos)\n\n💰 De {{Preço anterior}} (se existir, tachado, certifique-se que não tenha dois til ~)\n\n✅ Por {{Preço atual}} (negrito, certifique-se que não tenha dois asteriscos)\n\n🛒 LINK DA COMPRA: \n{{Link}}\n\nRetorne SOMENTE a mensagem formatada."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -522,7 +522,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "96e645d8-5081-4d0a-90a5-789ed349cd25",
+  "versionId": "39f4c5c2-fb5c-4457-ae80-6ace4d2d314f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5890a1a438ed1eacf55e8f858be87337fecdc2179e6a5acfb4e16c4b95789343"

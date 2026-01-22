@@ -85,27 +85,53 @@ def scrape(data: dict):
                     preco_atual = normalize_price_from_aria(aria)
 
             preco_anterior = None
-            old_price_locator = page.locator("span.andes-money-amount--previous")
+            old_price_locator = page.locator(
+                "s.andes-money-amount.andes-money-amount--previous"
+            )
+
             if old_price_locator.count() > 0:
                 aria = old_price_locator.first.get_attribute("aria-label")
                 if aria:
                     preco_anterior = normalize_price_from_aria(aria)
 
             imagem_url = None
-            img_locator = page.locator("img.ui-pdp-image")
+            img_locator = page.locator(
+                "img.ui-pdp-image.ui-pdp-gallery__figure__image"
+            )
+
             if img_locator.count() > 0:
-                imagem_url = img_locator.first.get_attribute("src")
+                imagem_url = (
+                    img_locator.first.get_attribute("data-zoom")
+                    or img_locator.first.get_attribute("src")
+    )
 
         # ===== AMAZON =====
         elif is_amazon(url):
-            page.wait_for_selector("#productTitle", timeout=60000)
-            titulo = page.locator("#productTitle").inner_text().strip()
+            page.wait_for_selector("#titleSection", timeout=60000)
+            page.wait_for_selector("#apex_desktop", timeout=60000)
 
-            if page.locator(".aok-offscreen").count() > 0:
-                preco_atual = page.locator(".aok-offscreen").first.inner_text().strip()
+            # Título
+            titulo = page.locator("#titleSection #productTitle").inner_text().strip()
 
-            if page.locator(".a-offscreen").count() > 1:
-                preco_anterior = page.locator(".a-offscreen").nth(1).inner_text().strip()
+            # Preço atual
+            apex = page.locator("#apex_desktop")
+            preco_atual = None
+            price = apex.locator("span.priceToPay")
+            if price.count() > 0:
+                preco_atual = (
+                    price.locator(".a-price-whole").first.inner_text().replace("\n","")
+                    + price.locator(".a-price-fraction").first.inner_text()
+                )
+                
+            # Preço anterior
+            preco_anterior = None
+            old_price_locator = page.locator(
+                "span.a-size-small.aok-offscreen:has-text('De:')"
+            )
+
+            if old_price_locator.count() > 0:
+                texto = old_price_locator.first.inner_text()
+                preco_anterior = texto.replace("De:", "").strip()
 
             if page.locator("#landingImage").count() > 0:
                 imagem_url = page.locator("#landingImage").get_attribute("data-old-hires") \
