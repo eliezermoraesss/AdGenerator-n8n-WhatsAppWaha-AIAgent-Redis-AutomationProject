@@ -22,45 +22,22 @@
         "promptType": "define",
         "text": "={{ $json.titulo }} {{ $json.preco_atual }}{{ $json.url }}{{ $json.preco_anterior }}",
         "options": {
-          "systemMessage": "[Você é um formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos na mensagem formatada final.\n\nProduto: {{ $json.titulo }}\nPreço atual: {{ $json.preco_atual }}\nPreço anterior: {{ $json.preco_anterior }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: \n{{Link}}"
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos na mensagem formatada final.\n\nProduto: {{ $json.titulo }}\nPreço atual: {{ $json.preco_atual }}\nPreço anterior: {{ $json.preco_anterior }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: \n{{Link}}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2352,
-        432
+        2368,
+        416
       ],
       "id": "b772a12d-4787-4cfd-a775-c01df3a7b5a3",
       "name": "AI Agent"
     },
     {
       "parameters": {
-        "options": {
-          "temperature": 0.4
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        2304,
-        672
-      ],
-      "id": "38c051a8-1a01-4246-946f-0984fa7ef86f",
-      "name": "Google Gemini Chat Model",
-      "retryOnFail": false,
-      "notesInFlow": false,
-      "credentials": {
-        "googlePalmApi": {
-          "id": "HNz0EUe9NEdum5I0",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Mapear Campos').item.json.chatId }}",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
         "sessionTTL": 300,
         "contextWindowLength": 10
       },
@@ -68,7 +45,7 @@
       "typeVersion": 1.5,
       "position": [
         2496,
-        672
+        640
       ],
       "id": "1098d388-5ec0-4fd3-9895-7416e655774b",
       "name": "Redis Chat Memory",
@@ -91,8 +68,8 @@
       "type": "n8n-nodes-waha.WAHA",
       "typeVersion": 202411,
       "position": [
-        2704,
-        432
+        2688,
+        528
       ],
       "id": "5861e8c2-abde-4902-ba54-0136f5db96dc",
       "name": "Send Seen",
@@ -166,7 +143,8 @@
         192
       ],
       "id": "e54225eb-933d-4ce0-9adf-28f3d4e67729",
-      "name": "Mapear Campos"
+      "name": "Mapear Campos",
+      "retryOnFail": false
     },
     {
       "parameters": {
@@ -174,7 +152,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 3
           },
           "conditions": [
@@ -242,52 +220,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2880,
-        208
-      ],
-      "id": "48cf5934-472a-4fef-ae98-ca8c75691e3c",
-      "name": "Tem URL ?"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "5a4d79c3-de7a-4962-bd58-0b6a37c9c92a",
-              "leftValue": "={{ $json.hasUrl }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        3072,
-        208
-      ],
-      "id": "25626620-9bd7-46f6-a37e-7c557ddd8536",
-      "name": "URL associado ou afiliado?"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "http://scraper:8000/scrape",
         "sendBody": true,
@@ -324,8 +256,8 @@
       "type": "n8n-nodes-waha.WAHA",
       "typeVersion": 202411,
       "position": [
-        2912,
-        432
+        2880,
+        528
       ],
       "id": "9221af10-2598-4dc6-bda0-7fa2e38eaa55",
       "name": "Send a text message",
@@ -335,6 +267,243 @@
           "name": "WAHA account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        208
+      ],
+      "id": "48cf5934-472a-4fef-ae98-ca8c75691e3c",
+      "name": "Tem URL?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5a4d79c3-de7a-4962-bd58-0b6a37c9c92a",
+              "leftValue": "={{ $json.hasUrl }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3072,
+        208
+      ],
+      "id": "25626620-9bd7-46f6-a37e-7c557ddd8536",
+      "name": "Switch Tem URL válida?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.status }}{{ $json.error_type }}{{ $json.message }}{{ $json.url }}",
+        "options": {
+          "systemMessage": "=Você é um bot formatador de mensagens para ofertas e respostas automáticas que serão enviadas pelo WhatsApp e Telegram.\n\nREGRAS OBRIGATÓRIAS:\n- GARANTA que não tenha asterísco duplicado na mensagem final, ou seja, nos negritos (**) especificados.\n- Sempre responda de forma amigável, clara e profissional.\n- Nunca exponha erros técnicos internos, stack trace ou termos complexos.\n- Sempre enfatize que o produto do anúncio **pode não estar mais disponível**, usando negrito.\n- Nunca invente informações que não estejam nos dados de entrada.\n- Use linguagem simples e humana, adequada para WhatsApp e Telegram.\n- Quando ocorrer erro, ofereça uma alternativa (reenviar o link ou tentar novamente).\n\nOBJETIVO:\nTransformar dados técnicos de erro em uma mensagem amigável para o usuário final.\n\nDADOS DE ENTRADA:\nMensagem do erro: {{ $json.message }}\nURL do anúncio: {{ $json.url }}\nStatus: {{ $json.status }}\nTipo do erro: {{ $json.error_type }}\n\nCOMPORTAMENTO ESPERADO:\n- Se o status for \"error\", gere uma mensagem educada explicando que não foi possível acessar o anúncio no momento.\n- Caso o tipo do erro seja TIMEOUT, informe que a página demorou para responder.\n- Inclua sempre a URL recebida.\n- Inclua sempre o aviso em negrito de que o produto pode não estar mais disponível.\n- Finalize convidando o usuário a tentar novamente ou enviar outro link.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2368,
+        816
+      ],
+      "id": "75239db4-2852-4ddd-8a71-cc3522325855",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        1040
+      ],
+      "id": "fadf7211-5e03-4644-aa13-ca8ee1e7afac",
+      "name": "Bot de resposta falhas",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HNz0EUe9NEdum5I0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        640
+      ],
+      "id": "38c051a8-1a01-4246-946f-0984fa7ef86f",
+      "name": "Bot formatador de anúncios",
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HNz0EUe9NEdum5I0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Mapear Campos').item.json.session }}",
+        "chatId": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageId": "={{ $('Mapear Campos').item.json.payload_id }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        2688,
+        720
+      ],
+      "id": "b39fbcca-cd1e-4213-a6b5-73d750e0b06c",
+      "name": "Send Seen1",
+      "credentials": {
+        "wahaApi": {
+          "id": "jaK3ENFgoQfHuLx3",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Mapear Campos').item.json.session }}",
+        "chatId": "={{ $('Mapear Campos').item.json.chatId }}",
+        "text": "={{ $('AI Agent1').item.json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        2880,
+        720
+      ],
+      "id": "6fd9e335-fc1b-4a70-965a-a7cf7adf0169",
+      "name": "Send a text message1",
+      "credentials": {
+        "wahaApi": {
+          "id": "jaK3ENFgoQfHuLx3",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
+        "sessionTTL": 500
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        2496,
+        1040
+      ],
+      "id": "9b774578-4e9d-418c-bb82-d8ea31e53c3c",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "l6KHjUsr9vLhdCX3",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fca88342-0fd7-4206-91b0-e29c07e9f08f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a1183647-7e8c-4fb9-b383-1284e51dbbab",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2128,
+        640
+      ],
+      "id": "ae6ad8d6-6f34-4d0e-af2a-8adba382427d",
+      "name": "Status do scraper"
     }
   ],
   "pinData": {},
@@ -345,17 +514,6 @@
           {
             "node": "Mapear Campos",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -421,29 +579,7 @@
       "main": [
         [
           {
-            "node": "Tem URL ?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Tem URL ?": {
-      "main": [
-        [
-          {
-            "node": "URL associado ou afiliado?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "URL associado ou afiliado?": {
-      "main": [
-        [
-          {
-            "node": "Fazer Webscrapping Playwright",
+            "node": "Tem URL?",
             "type": "main",
             "index": 0
           }
@@ -454,7 +590,102 @@
       "main": [
         [
           {
+            "node": "Status do scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem URL?": {
+      "main": [
+        [
+          {
+            "node": "Switch Tem URL válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Tem URL válida?": {
+      "main": [
+        [
+          {
+            "node": "Fazer Webscrapping Playwright",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send Seen1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot de resposta falhas": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador de anúncios": {
+      "ai_languageModel": [
+        [
+          {
             "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status do scraper": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
             "type": "main",
             "index": 0
           }
@@ -467,9 +698,10 @@
     "executionOrder": "v1",
     "availableInMCP": false,
     "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "WxVHdje0Yl7T7GMJNBpbM"
   },
-  "versionId": "b143aa27-49be-4e54-8009-1b9ecc40e5e0",
+  "versionId": "abf16ec4-37b5-4547-b981-5e09737062c0",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5890a1a438ed1eacf55e8f858be87337fecdc2179e6a5acfb4e16c4b95789343"
