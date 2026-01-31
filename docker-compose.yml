@@ -1,4 +1,59 @@
 services:
+  evolution-api:
+    container_name: evolution_api
+    image: evoapicloud/evolution-api:v2.3.2
+    restart: always
+    depends_on:
+      - redis-evolution
+      - postgres-evolution
+    ports:
+      - 8080:8080
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - evolution_n8n_net
+    env_file:
+      - .env
+    expose:
+      - 8080
+
+  postgres-evolution:
+    container_name: postgres_evolution
+    image: postgres:15
+    networks:
+      - evolution_n8n_net
+    command: [
+      "postgres",
+      "-c", "max_connections=200",
+      "-c", "listen_addresses=*",
+      "-c", "shared_buffers=256MB",
+      "-c", "effective_cache_size=1GB",
+      "-c", "work_mem=4MB"
+    ]
+    restart: always
+    ports:
+      - 5436:5432
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=evolution_db
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+    - postgres_evolution_data:/var/lib/postgresql/data
+
+  redis-evolution:
+    image: redis:latest
+    networks:
+      - evolution_n8n_net
+    container_name: redis_evolution
+    command: >
+      redis-server --port 6379 --appendonly yes
+    volumes:
+      - redis_evolution_data:/data
+    restart: always
+    ports:
+      - 6380:6379
+
   redis:
     image: redis:latest
     platform: linux/amd64
@@ -9,17 +64,17 @@ services:
     ports:
       - "6379:6379"
 
-  postgres:
-    image: postgres:latest
-    platform: linux/amd64
-    environment:
-      POSTGRES_USER: default
-      POSTGRES_PASSWORD: default
-      POSTGRES_DB: default
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+  # postgres:
+  #   image: postgres:latest
+  #   platform: linux/amd64
+  #   environment:
+  #     POSTGRES_USER: default
+  #     POSTGRES_PASSWORD: default
+  #     POSTGRES_DB: default
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
 
   waha:
     image: devlikeapro/waha:latest
@@ -43,6 +98,8 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+    networks:
+      - evolution_n8n_net
 
   n8n:
     image: n8nio/n8n:latest
@@ -59,6 +116,8 @@ services:
       - N8N_LOG_LEVEL=debug
       - N8N_SECURE_COOKIE=false
       - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+    networks:
+      - evolution_n8n_net
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:
@@ -66,7 +125,14 @@ services:
     restart: unless-stopped
 
 volumes:
-  pgdata:
+  #pgdata:
   waha_sessions:
   waha_media:
   n8n_data:
+  evolution_instances:
+  postgres_evolution_data:
+  redis_evolution_data:
+
+networks:
+  evolution_n8n_net:
+    driver: bridge
