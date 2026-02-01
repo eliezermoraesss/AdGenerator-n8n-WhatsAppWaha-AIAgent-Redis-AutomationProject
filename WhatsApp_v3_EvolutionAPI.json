@@ -10,8 +10,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        272,
-        -304
+        -640,
+        -48
       ],
       "id": "51f41bee-7383-465a-a913-066d7ef36077",
       "name": "Webhook",
@@ -22,14 +22,14 @@
         "promptType": "define",
         "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $json.url }}",
         "options": {
-          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos na mensagem formatada final.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: \n{{Link}}"
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos na mensagem formatada final.\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 5 palavras. Adaptar frase quando houver preço anterior alto (ex: “Desconto absurdo”), seguidos de forma estratégica dos emojis a seguir 🔥💥🚀⏳⚡⬇️🤑‼️❕❗\nNo máximo 3 emojis por frase!\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: \n{{Link}}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2192,
-        -528
+        1312,
+        -256
       ],
       "id": "9c177ad2-d3ea-4c24-b465-36a1e7ac7caa",
       "name": "AI Agent"
@@ -44,8 +44,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        2320,
-        -304
+        1440,
+        -32
       ],
       "id": "1e88a7ff-988a-46bd-b34d-c619a2c19e14",
       "name": "Redis Chat Memory",
@@ -115,8 +115,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        448,
-        -304
+        -464,
+        -48
       ],
       "id": "d7b1c2a3-e79e-43d5-ae38-b6f285bbe290",
       "name": "Mapear Campos",
@@ -155,8 +155,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        848,
-        -288
+        -64,
+        -32
       ],
       "id": "5f26cf0a-e0ed-407a-8303-c543c992401f",
       "name": "Evento é mensagem?"
@@ -183,8 +183,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        1488,
-        -304
+        560,
+        -48
       ]
     },
     {
@@ -194,8 +194,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1040,
-        -288
+        128,
+        -32
       ],
       "id": "7ffe7ad6-8302-4939-a135-101ed609565a",
       "name": "Tem URL?"
@@ -227,8 +227,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1232,
-        -288
+        304,
+        -32
       ],
       "id": "037cf3bf-5efe-4058-98df-68e27510fd7b",
       "name": "Switch Tem URL válida?"
@@ -244,8 +244,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2192,
-        -128
+        1312,
+        160
       ],
       "id": "046c56c4-9844-4286-927a-9c7b74d74bd5",
       "name": "AI Agent1"
@@ -259,8 +259,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        2160,
-        96
+        1280,
+        384
       ],
       "id": "fc262b01-2b11-418c-a27e-80e018cbddc4",
       "name": "Bot de resposta falhas",
@@ -280,8 +280,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        2160,
-        -304
+        1264,
+        -32
       ],
       "id": "3811bb81-d9ed-4164-aeb2-c9a1f29e3fac",
       "name": "Bot formatador de anúncios",
@@ -303,8 +303,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        2320,
-        96
+        1440,
+        384
       ],
       "id": "ac8dcc40-1834-4d3c-8e69-dd776e2f2cd5",
       "name": "Redis Chat Memory1",
@@ -370,8 +370,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1904,
-        -304
+        992,
+        -48
       ],
       "id": "d8d7b4a7-64a1-4317-a4ae-0511f80b6a22",
       "name": "Status do scraper"
@@ -389,8 +389,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        2592,
-        -320
+        1696,
+        -256
       ],
       "id": "6745660a-7a3c-49c0-bdc2-2f0407fdc1e7",
       "name": "Enviar imagem",
@@ -428,8 +428,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        624,
-        -304
+        -288,
+        -48
       ],
       "id": "1d37f4b8-b5e9-4c1c-a6a5-e4e8afe088ac",
       "name": "Mensagem Evolution API?"
@@ -441,11 +441,34 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1696,
-        -304
+        784,
+        -48
       ],
       "id": "e2ad8979-92df-4a22-9435-462e94d64585",
       "name": "Normaliza URL da imagem para JPG"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        160
+      ],
+      "id": "825748a8-43e6-41f2-8814-c8026fc81e36",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -542,7 +565,7 @@
       "main": [
         [
           {
-            "node": "Enviar imagem",
+            "node": "Enviar texto",
             "type": "main",
             "index": 0
           }
@@ -629,7 +652,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "dba90c47-e558-4f3d-9995-e6aff0cffc3d",
+  "versionId": "81c10f16-8283-4237-aef7-5529474be0f5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
