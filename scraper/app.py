@@ -106,13 +106,14 @@ def scrape(data: dict):
                 if old_price_locator.count() > 0:
                     preco_anterior = old_price_locator.first.inner_text().replace("De:", "").strip()
 
-                raw_img = (
+                if page.locator("#landingImage").count() > 0:
+                    raw_img = (
                     page.locator("#landingImage").get_attribute("data-old-hires")
                     or page.locator("#landingImage").get_attribute("src")
-                )
+                    )
 
-                # reduzir resolução da amazon
-                imagem_url = re.sub(r"_SL\d+_", "_SX600_", raw_img)
+                    # reduzir resolução da amazon
+                    imagem_url = re.sub(r"_SL\d+_", "_SX600_", raw_img)
 
             else:
                 browser.close()
