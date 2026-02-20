@@ -10,7 +10,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -640,
+        -528,
         -48
       ],
       "id": "51f41bee-7383-465a-a913-066d7ef36077",
@@ -22,14 +22,14 @@
         "promptType": "define",
         "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $json.url }}",
         "options": {
-          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos na mensagem formatada final.\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 5 palavras. Adaptar frase quando houver preço anterior muito maior em relação ao atual, enfatizando o desconto, gerando uma frase que cative e desperte o interesse no cliente. A frase deve ser seguida de dois emojis que façam sentido com o contexto da frase marketeira e com a descrição do produto.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA:\n👉🏼 {{Link}}"
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 8 palavras. Adaptar frase quando houver preço anterior muito maior em relação ao atual, enfatizando o desconto, gerando uma frase que cative e desperte o interesse no cliente. A frase deve ser seguida de dois emojis que façam sentido com o contexto da frase marketeira e com a descrição do produto. Seja muito divertido, criativo e cativante nas frases e também, relacionando o produto com a necessidade do cliente.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: (negrito)\n👉🏼 {{Link}}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        432,
-        -48
+        1280,
+        -272
       ],
       "id": "9c177ad2-d3ea-4c24-b465-36a1e7ac7caa",
       "name": "AI Agent",
@@ -45,8 +45,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        528,
-        144
+        1376,
+        -80
       ],
       "id": "1e88a7ff-988a-46bd-b34d-c619a2c19e14",
       "name": "Redis Chat Memory",
@@ -116,7 +116,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -464,
+        -352,
         -48
       ],
       "id": "d7b1c2a3-e79e-43d5-ae38-b6f285bbe290",
@@ -156,7 +156,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -64,
+        48,
         -32
       ],
       "id": "5f26cf0a-e0ed-407a-8303-c543c992401f",
@@ -184,18 +184,18 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        -304,
-        176
+        624,
+        -48
       ]
     },
     {
       "parameters": {
-        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];\n"
+        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i,\n  /^https?:\\/\\/(www\\.)?amazon\\.com\\.br\\/dp\\/[A-Z0-9]+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        128,
+        240,
         -32
       ],
       "id": "7ffe7ad6-8302-4939-a135-101ed609565a",
@@ -228,8 +228,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -576,
-        192
+        400,
+        -32
       ],
       "id": "037cf3bf-5efe-4058-98df-68e27510fd7b",
       "name": "Switch Tem URL válida?"
@@ -245,8 +245,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        432,
-        368
+        1280,
+        144
       ],
       "id": "046c56c4-9844-4286-927a-9c7b74d74bd5",
       "name": "AI Agent1",
@@ -261,8 +261,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        384,
-        560
+        1232,
+        336
       ],
       "id": "fc262b01-2b11-418c-a27e-80e018cbddc4",
       "name": "Bot de resposta falhas",
@@ -282,8 +282,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        368,
-        144
+        1216,
+        -80
       ],
       "id": "3811bb81-d9ed-4164-aeb2-c9a1f29e3fac",
       "name": "Bot formatador de anúncios",
@@ -305,8 +305,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        544,
-        560
+        1392,
+        336
       ],
       "id": "ac8dcc40-1834-4d3c-8e69-dd776e2f2cd5",
       "name": "Redis Chat Memory1",
@@ -372,8 +372,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        128,
-        176
+        992,
+        -48
       ],
       "id": "d8d7b4a7-64a1-4317-a4ae-0511f80b6a22",
       "name": "Status do scraper"
@@ -391,8 +391,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        832,
-        -64
+        1680,
+        -288
       ],
       "id": "6745660a-7a3c-49c0-bdc2-2f0407fdc1e7",
       "name": "Enviar imagem",
@@ -401,7 +401,8 @@
           "id": "EQxneV000GnP2JfI",
           "name": "Evolution account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -430,7 +431,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -288,
+        -176,
         -48
       ],
       "id": "1d37f4b8-b5e9-4c1c-a6a5-e4e8afe088ac",
@@ -443,8 +444,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -64,
-        176
+        800,
+        -48
       ],
       "id": "e2ad8979-92df-4a22-9435-462e94d64585",
       "name": "Normaliza URL da imagem para JPG"
@@ -460,8 +461,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        832,
-        368
+        1680,
+        144
       ],
       "id": "825748a8-43e6-41f2-8814-c8026fc81e36",
       "name": "Enviar texto",
@@ -483,11 +484,34 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        832,
-        144
+        1680,
+        -80
       ],
       "id": "b27682d0-8610-4105-a48f-bafb6caf7cf9",
       "name": "Enviar texto1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $('AI Agent').item.json.output }}\n⚠️ Erro: ${$json.error}` }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        -192
+      ],
+      "id": "dca81a31-41c1-48ce-b1c3-f8dc3290701d",
+      "name": "Enviar texto2",
       "credentials": {
         "evolutionApi": {
           "id": "EQxneV000GnP2JfI",
@@ -681,7 +705,13 @@
     "Enviar imagem": {
       "main": [
         [],
-        []
+        [
+          {
+            "node": "Enviar texto2",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -690,7 +720,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "272c68e9-a2aa-4684-89fb-5f27e64ad84c",
+  "versionId": "47517807-26f9-4d8d-8e5e-bb0021afec4d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
