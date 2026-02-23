@@ -8,7 +8,7 @@ def is_amazon(url):
     return "amazon." in url or "amzn." in url
 
 def is_mercado_livre(url):
-    return "mercadolivre" in url
+    return "mercadolivre" in url or "meli.la" in url
 
 def normalize_price_from_aria(label: str):
     numbers = re.findall(r'\d+', label)

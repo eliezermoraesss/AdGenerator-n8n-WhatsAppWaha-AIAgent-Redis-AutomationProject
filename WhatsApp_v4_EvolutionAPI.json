@@ -1,0 +1,730 @@
+{
+  "name": "WhatsApp_v4_EvolutionAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e1ab7d4d-e7e8-43a6-bb25-daeb0a0d5e47",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2000,
+        96
+      ],
+      "id": "c39e1750-4fdc-4234-a325-5eaa7e25ffb8",
+      "name": "Webhook",
+      "webhookId": "e1ab7d4d-e7e8-43a6-bb25-daeb0a0d5e47"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $json.url }}",
+        "options": {
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 8 palavras. Adaptar frase quando houver preço anterior muito maior em relação ao atual, enfatizando o desconto, gerando uma frase que cative e desperte o interesse no cliente. A frase deve ser seguida de dois emojis que façam sentido com o contexto da frase marketeira e com a descrição do produto. Seja muito divertido, criativo e cativante nas frases e também, relacionando o produto com a necessidade do cliente.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: (negrito)\n👉🏼 {{Link}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        -128
+      ],
+      "id": "6180575d-966c-41b3-ac8f-aabd6c3c42db",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
+        "sessionTTL": 300,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -96,
+        64
+      ],
+      "id": "df6bd8df-db42-47f4-b683-a11a807ccf2a",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "Yg5Z7Klhh6GQJR8n",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62f02bb7-68d0-4899-a8b7-9c7fcba43de9",
+              "name": "session",
+              "value": "={{ $json.body.data.instanceId }}",
+              "type": "string"
+            },
+            {
+              "id": "10fee6eb-2796-45c8-b183-b437ef9c616a",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "e32344a2-84b5-45e6-bb0b-a5f326fb6000",
+              "name": "pushName",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "3c09bc62-7b4d-4c46-a2b4-56181f7c38b0",
+              "name": "payload_id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f1187069-33bd-4947-9a83-b6eddd77330a",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "8d013703-bec6-43b7-b421-2f1c581f4c4a",
+              "name": "message",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "29fb29d2-f8b1-4a03-97ae-7e9da33739b2",
+              "name": "fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7fad1054-d810-48a7-a23d-c0d2657cfa18",
+              "name": "source",
+              "value": "={{ $json.body.data.source }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1824,
+        96
+      ],
+      "id": "56a2fb46-ca2f-400e-9e06-245f7692378a",
+      "name": "Mapear Campos",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "949a5d2b-1d98-4091-81c8-d87c952aefa5",
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "messages.upsert",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1424,
+        112
+      ],
+      "id": "7797ee9e-8fef-44d0-87eb-e62408b0f705",
+      "name": "Evento é mensagem?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://scraper:8000/scrape",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "cf91067e-6f50-4013-af48-8da4b3c51297",
+      "name": "Fazer Webscrapping Playwright",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -848,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?meli\\.la\\/.+/i,              // ✅ NOVO ML SHORTLINK\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i,\n  /^https?:\\/\\/(www\\.)?amazon\\.com\\.br\\/dp\\/[A-Z0-9]+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        112
+      ],
+      "id": "826614ba-c17a-4c4b-9ddd-d9552c3d943d",
+      "name": "Tem URL?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5a4d79c3-de7a-4962-bd58-0b6a37c9c92a",
+              "leftValue": "={{ $json.hasUrl }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1072,
+        112
+      ],
+      "id": "039c205c-5109-4eeb-ac93-ea797877f0ac",
+      "name": "Switch Tem URL válida?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.status }}{{ $json.error_type }}{{ $json.message }}{{ $json.url }}",
+        "options": {
+          "systemMessage": "=Você é um bot formatador de mensagens para ofertas e respostas automáticas que serão enviadas pelo WhatsApp e Telegram.\n\nREGRAS OBRIGATÓRIAS:\n- GARANTA que não tenha asterísco duplicado na mensagem final, ou seja, nos negritos (**) especificados.\n- Sempre responda de forma amigável, clara e profissional.\n- Nunca exponha erros técnicos internos, stack trace ou termos complexos.\n- Sempre enfatize que o produto do anúncio **pode não estar mais disponível**, usando negrito.\n- Nunca invente informações que não estejam nos dados de entrada.\n- Use linguagem simples e humana, adequada para WhatsApp e Telegram.\n- Quando ocorrer erro, ofereça uma alternativa (reenviar o link ou tentar novamente).\n\nOBJETIVO:\nTransformar dados técnicos de erro em uma mensagem amigável para o usuário final.\n\nDADOS DE ENTRADA:\nMensagem do erro: {{ $json.message }}\nURL do anúncio: {{ $json.url }}\nStatus: {{ $json.status }}\nTipo do erro: {{ $json.error_type }}\n\nCOMPORTAMENTO ESPERADO:\n- Se o status for \"error\", gere uma mensagem educada explicando que não foi possível acessar o anúncio no momento.\n- Caso o tipo do erro seja TIMEOUT, informe que a página demorou para responder.\n- Inclua sempre a URL recebida.\n- Inclua sempre o aviso em negrito de que o produto pode não estar mais disponível.\n- Finalize convidando o usuário a tentar novamente ou enviar outro link.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        288
+      ],
+      "id": "34f1338c-4bff-4cfc-b22b-6ad8c0c1953f",
+      "name": "AI Agent1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        480
+      ],
+      "id": "062d783f-a7b4-4b43-81e9-4640d78a79e5",
+      "name": "Bot de resposta falhas",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Kpl9ql6z3iYDc8fw",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        64
+      ],
+      "id": "9bcd508c-3983-46d8-8437-bb6656cf4d0c",
+      "name": "Bot formatador de anúncios",
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Kpl9ql6z3iYDc8fw",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
+        "sessionTTL": 500
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -80,
+        480
+      ],
+      "id": "f85c05e7-e481-41c4-a745-6fab1aa8dbdd",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "Yg5Z7Klhh6GQJR8n",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fca88342-0fd7-4206-91b0-e29c07e9f08f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a1183647-7e8c-4fb9-b383-1284e51dbbab",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        96
+      ],
+      "id": "8623feaa-8ebb-4e85-954a-76419b890d58",
+      "name": "Status do scraper"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "media": "={{ $('Normaliza URL da imagem para JPG').item.json.imagem_url_converted }}",
+        "caption": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -144
+      ],
+      "id": "58603ec4-e19a-484d-850e-af2ee86cb64f",
+      "name": "Enviar imagem",
+      "credentials": {
+        "evolutionApi": {
+          "id": "T4WqpslYnl9Bo8Po",
+          "name": "Evolution account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a8390dab-2cda-4c59-985c-dda296a43740",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "api",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1648,
+        96
+      ],
+      "id": "e4e4d6ba-2686-4900-a048-8ef5ecdede95",
+      "name": "Mensagem Evolution API?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ACCEPTED_EXTENSIONS = ['jpg', 'jpeg', 'png'];\n\nfor (const item of $input.all()) {\n  const imageUrl = item.json.imagem_url;\n\n  if (!imageUrl || typeof imageUrl !== 'string') {\n    item.json.imagem_url_converted = null;\n    continue;\n  }\n\n  // Separa URL base e query string\n  const [baseUrl, queryString] = imageUrl.split('?');\n\n  // Separa partes pelo ponto\n  const parts = baseUrl.split('.');\n\n  if (parts.length < 2) {\n    // URL sem extensão clara\n    item.json.imagem_url_converted = imageUrl;\n    continue;\n  }\n\n  const currentExtension = parts.pop().toLowerCase();\n\n  if (ACCEPTED_EXTENSIONS.includes(currentExtension)) {\n    // Já é um formato aceito pelo WhatsApp\n    item.json.imagem_url_converted = imageUrl;\n  } else {\n    // Força JPG\n    const newBaseUrl = [...parts, 'jpg'].join('.');\n    item.json.imagem_url_converted = queryString\n      ? `${newBaseUrl}?${queryString}`\n      : newBaseUrl;\n  }\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "e41c879d-9a8c-49d0-bbc0-694a26188c63",
+      "name": "Normaliza URL da imagem para JPG"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        288
+      ],
+      "id": "a2e387c1-0d92-433a-b5ee-d0183719f128",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "T4WqpslYnl9Bo8Po",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{\n`❌ Erro ao processar oferta\n\n📦 Produto: ${$json.titulo}\n💰 Preço: ${$json.preco_atual}\n🖼️ Imagem: ${$json.imagem_url_converted}\n🔗 Link: ${$json.url}\n\n⚠️ Erro:\n${$json.error}`\n}}\n",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        64
+      ],
+      "id": "6368f5d1-e525-4c0e-ae15-2cf74208f643",
+      "name": "Enviar texto1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "T4WqpslYnl9Bo8Po",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $('AI Agent').item.json.output }}\n⚠️ Erro: ${$json.error}` }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -48
+      ],
+      "id": "64785d44-15d0-4305-87a6-4238cea39109",
+      "name": "Enviar texto2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "T4WqpslYnl9Bo8Po",
+          "name": "Evolution account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Mapear Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar imagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Campos": {
+      "main": [
+        [
+          {
+            "node": "Mensagem Evolution API?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento é mensagem?": {
+      "main": [
+        [
+          {
+            "node": "Tem URL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fazer Webscrapping Playwright": {
+      "main": [
+        [
+          {
+            "node": "Normaliza URL da imagem para JPG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem URL?": {
+      "main": [
+        [
+          {
+            "node": "Switch Tem URL válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Tem URL válida?": {
+      "main": [
+        [
+          {
+            "node": "Fazer Webscrapping Playwright",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot de resposta falhas": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador de anúncios": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status do scraper": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Evolution API?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Evento é mensagem?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza URL da imagem para JPG": {
+      "main": [
+        [
+          {
+            "node": "Status do scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar imagem": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Enviar texto2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "892db36d-5ad0-42f8-9f3c-f86d30ca2d9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "417be51ec2e59de6d9fd3163cadf0f805c6936aa400a5ceb2195c60667a3f1a4"
+  },
+  "id": "obwhX6lKmJVT_U3o6cgWl",
+  "tags": []
+}
