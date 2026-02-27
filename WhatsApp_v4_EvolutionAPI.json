@@ -20,16 +20,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $json.url }}",
+        "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $('Montar JSON').item.json.cupom }}{{ $json.url }}",
         "options": {
-          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 8 palavras. Adaptar frase quando houver preço anterior muito maior em relação ao atual, enfatizando o desconto, gerando uma frase que cative e desperte o interesse no cliente. A frase deve ser seguida de dois emojis que façam sentido com o contexto da frase marketeira e com a descrição do produto. Seja muito divertido, criativo e cativante nas frases e também, relacionando o produto com a necessidade do cliente.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFormato obrigatório:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🛒 LINK DA COMPRA: (negrito)\n👉🏼 {{Link}}"
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nO titulo não pode conter palavras repetidas e virgulas, a informação deve ser a melhor possivel\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, vai inserir uma frase para atrair vendas de no máximo 8 palavras. Adaptar frase quando houver preço anterior muito maior em relação ao atual, enfatizando o desconto, gerando uma frase que cative e desperte o interesse no cliente. A frase deve ser seguida de dois emojis que façam sentido com o contexto da frase marketeira e com a descrição do produto. Seja muito divertido, criativo e cativante nas frases e também, relacionando o produto com a necessidade do cliente.\n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nLink: {{ $json.url }}\n\n]\n\nFORMATO OBRIGATÓRIO DA SAÍDA\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🏷️ `Cupom: {{Cupom}}` ⚠️ (só o texto do cupom entre crases ``)\n\n🛒 LINK DA COMPRA: (negrito)\n👉🏼 {{Link}}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -192,
-        -128
+        48,
+        -96
       ],
       "id": "6180575d-966c-41b3-ac8f-aabd6c3c42db",
       "name": "AI Agent",
@@ -45,8 +45,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -96,
-        64
+        160,
+        128
       ],
       "id": "df6bd8df-db42-47f4-b683-a11a807ccf2a",
       "name": "Redis Chat Memory",
@@ -190,19 +190,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?meli\\.la\\/.+/i,              // ✅ NOVO ML SHORTLINK\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i,\n  /^https?:\\/\\/(www\\.)?amazon\\.com\\.br\\/dp\\/[A-Z0-9]+/i\n];\n\n// Procura a primeira URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1232,
-        112
-      ],
-      "id": "826614ba-c17a-4c4b-9ddd-d9552c3d943d",
-      "name": "Tem URL?"
-    },
-    {
-      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -245,8 +232,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -192,
-        288
+        -288,
+        368
       ],
       "id": "34f1338c-4bff-4cfc-b22b-6ad8c0c1953f",
       "name": "AI Agent1",
@@ -261,8 +248,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -240,
-        480
+        -336,
+        560
       ],
       "id": "062d783f-a7b4-4b43-81e9-4640d78a79e5",
       "name": "Bot de resposta falhas",
@@ -282,8 +269,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -256,
-        64
+        0,
+        160
       ],
       "id": "9bcd508c-3983-46d8-8437-bb6656cf4d0c",
       "name": "Bot formatador de anúncios",
@@ -305,8 +292,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -80,
-        480
+        -176,
+        560
       ],
       "id": "f85c05e7-e481-41c4-a745-6fab1aa8dbdd",
       "name": "Redis Chat Memory1",
@@ -391,8 +378,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        208,
-        -144
+        464,
+        -80
       ],
       "id": "58603ec4-e19a-484d-850e-af2ee86cb64f",
       "name": "Enviar imagem",
@@ -461,8 +448,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        208,
-        288
+        112,
+        368
       ],
       "id": "a2e387c1-0d92-433a-b5ee-d0183719f128",
       "name": "Enviar texto",
@@ -484,8 +471,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        208,
-        64
+        464,
+        128
       ],
       "id": "6368f5d1-e525-4c0e-ae15-2cf74208f643",
       "name": "Enviar texto1",
@@ -507,8 +494,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        432,
-        -48
+        704,
+        64
       ],
       "id": "64785d44-15d0-4305-87a6-4238cea39109",
       "name": "Enviar texto2",
@@ -518,6 +505,67 @@
           "name": "Evolution account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\n// Se não tiver URL\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false,\n        cupom: null,\n        desconto: null\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?meli\\.la\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i,\n  /^https?:\\/\\/(www\\.)?amazon\\.com\\.br\\/dp\\/[A-Z0-9]+/i\n];\n\n// Procura URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\n// 🔎 Detectar CUPOM\nlet cupom = null;\n\nconst cupomRegex = /\\b(?:cupom|codigo|código)\\s*:?\\s*([a-z0-9\\-]+)/i;\nconst cupomMatch = text.match(cupomRegex);\n\nif (cupomMatch && cupomMatch[1]) {\n  cupom = cupomMatch[1].toUpperCase();\n}\n\n// 🔎 Detectar DESCONTO\nlet desconto = null;\n\n// primeiro tenta percentual\nconst percentMatch = text.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);\n\nif (percentMatch) {\n  desconto = percentMatch[1] + \"%\";\n} else {\n  // tenta número solto (ex: \"desconto 12\")\n  const numberMatch = text.match(/\\b(?:desconto|off|descontar)\\s*(\\d+(?:[.,]\\d+)?)/i);\n  if (numberMatch) {\n    desconto = parseFloat(numberMatch[1].replace(\",\", \".\"));\n  }\n}\n\n// Se não tiver URL válida\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false,\n        cupom,\n        desconto\n      }\n    }\n  ];\n}\n\n// Retorno final\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl,\n      cupom,\n      desconto\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        112
+      ],
+      "id": "826614ba-c17a-4c4b-9ddd-d9552c3d943d",
+      "name": "Montar JSON"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseMoney(value) {\n\tif (!value) return 0;\n\treturn parseFloat(\n\t\tvalue\n\t\t\t.toString()\n\t\t\t.replace(\"R$\", \"\")\n\t\t\t.replace(/\\./g, \"\")\n\t\t\t.replace(\",\", \".\")\n\t\t\t.trim()\n\t);\n}\n\nfunction formatBRL(value) {\n\treturn \"R$ \" + value\n\t\t.toFixed(2)\n\t\t.replace(\".\", \",\")\n\t\t.replace(/\\B(?=(\\d{3})+(?!\\d))/g, \".\");\n}\n\nconst descontoRaw = $('Montar JSON').first().json.desconto;\n\nfor (const item of $input.all()) {\n\tconst precoStr = item.json.preco_atual;\n\tconst preco = parseMoney(precoStr);\n\n\tlet novoPreco = preco;\n\n\tif (descontoRaw !== undefined && descontoRaw !== null && descontoRaw !== \"\") {\n\n\t\tlet isPercent = false;\n\t\tlet valorDesconto = 0;\n\n\t\t// 🔥 Se for STRING\n\t\tif (typeof descontoRaw === \"string\") {\n\t\t\tconst desc = descontoRaw.trim();\n\n\t\t\tif (desc.includes(\"%\")) {\n\t\t\t\tisPercent = true;\n\t\t\t\tvalorDesconto = parseFloat(desc.replace(\"%\", \"\").replace(\",\", \".\"));\n\t\t\t} else {\n\t\t\t\tvalorDesconto = parseFloat(desc.replace(\",\", \".\"));\n\t\t\t}\n\t\t}\n\n\t\t// 🔥 Se for NUMBER\n\t\telse if (typeof descontoRaw === \"number\") {\n\t\t\tvalorDesconto = descontoRaw;\n\t\t}\n\n\t\t// aplica regra\n\t\tif (!isNaN(valorDesconto)) {\n\t\t\tif (isPercent) {\n\t\t\t\tnovoPreco = preco - (preco * valorDesconto / 100);\n\t\t\t} else {\n\t\t\t\tnovoPreco = preco - valorDesconto;\n\t\t\t}\n\t\t}\n\t}\n\n\tif (novoPreco < 0) novoPreco = 0;\n\n\titem.json.preco_atual = formatBRL(novoPreco);\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        32
+      ],
+      "id": "8b6fa6f8-57e4-4a0b-a4c7-3092455efe5f",
+      "name": "Calcular desconto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea7115a3-c081-4548-9fb1-bb59ea421d14",
+              "leftValue": "={{ $('Montar JSON').item.json.desconto }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        -80
+      ],
+      "id": "573e74ad-2b3e-49f1-9afb-67b7445c5eec",
+      "name": "Tem desconto?"
     }
   ],
   "pinData": {},
@@ -577,7 +625,7 @@
       "main": [
         [
           {
-            "node": "Tem URL?",
+            "node": "Montar JSON",
             "type": "main",
             "index": 0
           }
@@ -589,17 +637,6 @@
         [
           {
             "node": "Normaliza URL da imagem para JPG",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Tem URL?": {
-      "main": [
-        [
-          {
-            "node": "Switch Tem URL válida?",
             "type": "main",
             "index": 0
           }
@@ -665,7 +702,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Tem desconto?",
             "type": "main",
             "index": 0
           }
@@ -713,6 +750,46 @@
           }
         ]
       ]
+    },
+    "Montar JSON": {
+      "main": [
+        [
+          {
+            "node": "Switch Tem URL válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular desconto": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem desconto?": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calcular desconto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -720,7 +797,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "892db36d-5ad0-42f8-9f3c-f86d30ca2d9a",
+  "versionId": "8b628fe3-65bb-4ddf-b36e-eaee26d8432e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "417be51ec2e59de6d9fd3163cadf0f805c6936aa400a5ceb2195c60667a3f1a4"
