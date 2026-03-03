@@ -1,0 +1,37 @@
+{
+  "name": "ULTRA PRO - MASTER",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "afiliado-ultra",
+        "httpMethod": "POST"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const text = $json.body?.message || '';\nconst urls = text.match(/https?:\\/\\/[^\\s]+/g) || [];\n\nreturn urls.map(u => ({ json: { url: u } }));"
+      },
+      "id": "extract",
+      "name": "Extrair Links",
+      "type": "n8n-nodes-base.function",
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": "ULTRA PRO - WORKER"
+      },
+      "id": "enqueue",
+      "name": "Enviar para Fila",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Extrair Links" }]] },
+    "Extrair Links": { "main": [[{ "node": "Enviar para Fila" }]] }
+  }
+}
