@@ -61,6 +61,7 @@ services:
     environment:
       REDIS_USER: default
       REDIS_PASSWORD: default
+    restart: always
     ports:
       - "6379:6379"
 
