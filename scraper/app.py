@@ -51,39 +51,33 @@ def scrape(data: dict):
             if is_mercado_livre(url):
                 page.wait_for_load_state("domcontentloaded")
 
-                botao = page.locator(
-                    "a.poly-component__link--action-link:has-text('Ir para produto')"
-                )
+                # Tenta encontrar a lista de recomendações
+                recommendations = page.locator("div.ui-recommendations-list__container--single")
+                if recommendations.count() > 0:
+                    # Pega o primeiro card de produto
+                    card = recommendations.locator("div.poly-card").first
 
-                if botao.count() > 0:
-                    botao.first.click()
-                    page.wait_for_load_state("domcontentloaded")
+                    # Título
+                    titulo = card.locator("a.poly-component__title").first.inner_text().strip()
 
-                page.wait_for_selector("h1.ui-pdp-title", timeout=60000)
-                titulo = page.locator("h1.ui-pdp-title").first.inner_text().strip()
+                    # Preço atual
+                    price_locator = card.locator("div.poly-price__current span.andes-money-amount")
+                    if price_locator.count() > 0:
+                        aria = price_locator.first.get_attribute("aria-label")
+                        if aria:
+                            preco_atual = normalize_price_from_aria(aria)
 
-                price_locator = page.locator("span[itemprop='offers']")
-                if price_locator.count() > 0:
-                    aria = price_locator.first.get_attribute("aria-label")
-                    if aria:
-                        preco_atual = normalize_price_from_aria(aria)
+                    # Preço anterior
+                    old_price_locator = card.locator("s.andes-money-amount.andes-money-amount--previous")
+                    if old_price_locator.count() > 0:
+                        aria = old_price_locator.first.get_attribute("aria-label")
+                        if aria:
+                            preco_anterior = normalize_price_from_aria(aria)
 
-                old_price_locator = page.locator(
-                    "s.andes-money-amount.andes-money-amount--previous"
-                )
-                if old_price_locator.count() > 0:
-                    aria = old_price_locator.first.get_attribute("aria-label")
-                    if aria:
-                        preco_anterior = normalize_price_from_aria(aria)
-
-                img_locator = page.locator(
-                    "img.ui-pdp-image.ui-pdp-gallery__figure__image"
-                )
-                if img_locator.count() > 0:
-                    imagem_url = (
-                        img_locator.first.get_attribute("data-zoom")
-                        or img_locator.first.get_attribute("src")
-                    )
+                    # Imagem
+                    img_locator = card.locator("img.poly-component__picture")
+                    if img_locator.count() > 0:
+                        imagem_url = img_locator.first.get_attribute("src")
 
             # ===== AMAZON =====
             elif is_amazon(url):
