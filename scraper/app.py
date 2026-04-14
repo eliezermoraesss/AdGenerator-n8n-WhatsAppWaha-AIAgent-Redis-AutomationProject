@@ -81,18 +81,24 @@ def scrape(data: dict):
 
             # ===== AMAZON =====
             elif is_amazon(url):
-                page.wait_for_selector("#titleSection", timeout=60000)
-                page.wait_for_selector("#apex_desktop", timeout=60000)
+                page.wait_for_load_state("domcontentloaded")
 
                 titulo = page.locator("#titleSection #productTitle").inner_text().strip()
 
-                apex = page.locator("#apex_desktop")
-                price = apex.locator("span.priceToPay")
+                price = page.locator("div.a-section.apex-core-price-identifier").first
                 if price.count() > 0:
-                    preco_atual = (
-                        price.locator(".a-price-whole").first.inner_text().replace("\n", "")
-                        + price.locator(".a-price-fraction").first.inner_text()
-                    )
+                    offscreen_price = price.locator("span.a-offscreen").first
+                    if offscreen_price.count() > 0:
+                        preco_atual = offscreen_price.inner_text().strip()
+
+                    if not preco_atual:
+                        whole = price.locator("span.a-price-whole").first
+                        fraction = price.locator("span.a-price-fraction").first
+                        if whole.count() > 0 and fraction.count() > 0:
+                            preco_atual = (
+                                f"R$ {whole.inner_text().replace(',', '').replace('.', '').strip()},"
+                                f"{fraction.inner_text().strip()}"
+                            )
 
                 old_price_locator = page.locator(
                     "span.a-size-small.aok-offscreen:has-text('De:')"
