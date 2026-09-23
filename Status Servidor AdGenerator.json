@@ -1,0 +1,129 @@
+{
+  "name": "Status Servidor AdGenerator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 00 8 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5cc21c9a-d83e-405c-a63a-5f6e42cb6fe6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519996090636@s.whatsapp.net",
+        "messageText": "=Bom dia, Pepexinha! 😊🐟\n\nDeus abençoe o seu dia! 🙏\nO meu programador lindo 💻❤️ me programou para te avisar que eu já estou disponível para você! 🤖\n\nAproveite meus serviços para gerar seus anúncios tá!? 🔥🤣\n\nAbraços! 🤗",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -176
+      ],
+      "id": "b01b35cb-8a03-44cd-abee-ab0a80a7c3d2",
+      "name": "Aviso server online Nádia",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519988398356@s.whatsapp.net",
+        "messageText": "=Bom dia, Pedro! 😊\n\nDeus abençoe o seu dia! 🙏\nO meu programador lindo 💻❤️ me programou para te avisar que eu já estou disponível para você! 🤖\n\nAproveite meus serviços para gerar seus anúncios tá!? 🔥🤣\n\nAbraços! 🤗",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bb5b19a6-3b3a-4ce7-82da-cd60e983e1a5",
+      "name": "Aviso server online Pedro",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519981374137@s.whatsapp.net",
+        "messageText": "=Bom dia mestre! 😊\n\nDeus abençoe o seu dia! ✨\nPassando para avisar que eu já estou disponível para você! 🤖\n\nAproveite meus serviços para gerar seus anúncios tá!? 📢🤣\n\nAbraços! 🤗",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "04aee0ad-d808-42e3-ae30-28196fe49acb",
+      "name": "Aviso server online Eliezer",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Aviso server online Pedro",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aviso server online Nádia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aviso server online Eliezer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "72414219-fe36-4c9e-b20a-2cfc1e7267ba",
+  "meta": {
+    "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
+  },
+  "id": "dG09QwsF0JdrAlQQTvsgH",
+  "tags": []
+}

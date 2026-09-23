@@ -1,0 +1,194 @@
+{
+  "name": "Bom dia AdGenerator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 05 8 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "76b69873-95f9-466a-b9ab-b17c2c5d9fa9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const hoje = new Date();\nconst diaSemana = hoje.getDay(); // 0 = Domingo, 6 = Sábado\n\nlet mensagem = \"\";\n\nswitch (diaSemana) {\n  case 0:\n    mensagem = `BOM DIAAA ‼️\nBOM DOMINGO E BORA COMEÇAR COM OS ACHADOS❗🔥🛒`;\n    break;\n\n  case 1:\n    mensagem = `BOM DIAAA E ÓTIMA SEGUNDA-FEIRA PESSOAL‼️\n\nBORA COMEÇAR COM OS ACHADOS DE HOJE❗🔥`;\n    break;\n\n  case 2:\n    mensagem = `BOM DIAA E ÓTIMA TERÇA-FEIRA PESSOAL❗\n\nBORA COMEÇAR COM OS ACHADOS DE HOJE❗🔥`;\n    break;\n\n  case 3:\n    mensagem = `BOM DIA PESSOAL! ☀️\nÓTIMA QUARTA PRA GENTE 🗯\n\nPODEMOS COMEÇAR COM OS NOSSOS ACHADOS⁉️ 🗣`;\n    break;\n\n  case 4:\n    mensagem = `BOM DIA PESSOAL! 🗯\n\nÓTIMA QUINTA, BORA COMEÇAR COM OS ACHADOS DE HOJE ‼️`;\n    break;\n\n  case 5:\n    mensagem = `BOM DIA GALEEERA‼️ \nEXCELENTE SEXTA PARA VOCÊS❗🙏🏼\n\nBORA COMEÇAR COM AS OFERTAS❗ 🛍️🤩`;\n    break;\n\n  case 6:\n    mensagem = `BOM DIA‼️ \nEXCELENTE SÁBADO PARA VOCÊS❗🙏🏼\n\nBORA COMEÇAR COM AS OFERTAS 🔥🔥`;\n    break;\n}\n\n// retorna no formato que o n8n espera\nreturn [\n  {\n    json: {\n      mensagem: mensagem\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        0
+      ],
+      "id": "2835d90a-89b0-4903-8943-90eb15b3ebd9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "120363406064472961@g.us\n\nID do grupo Compra Inteligente"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "7ed70c97-d059-420a-9de7-70d3d186cbc7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519996090636@s.whatsapp.net",
+        "messageText": "={{ $json.mensagem }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -176
+      ],
+      "id": "fd674013-4c1c-40de-a510-2c4ef4509857",
+      "name": "Bom dia Nádia",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519988398356@s.whatsapp.net",
+        "messageText": "={{ $json.mensagem }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5d1825f6-f41b-4e0d-9d45-5899c4fc4038",
+      "name": "Bom dia Pedro",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "=CompraInteligente",
+        "remoteJid": "=5519981374137@s.whatsapp.net",
+        "messageText": "={{ $json.mensagem }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        416,
+        192
+      ],
+      "id": "5d487808-a8b1-4b7a-9fbe-e211981a7489",
+      "name": "Bom dia Eliezer",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "CompraInteligente",
+        "remoteJid": "=120363406064472961@g.us",
+        "messageText": "={{ $json.mensagem }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -368
+      ],
+      "id": "ae141583-2f8f-48d0-b8a2-210e4d5ac487",
+      "name": "Bom dia Compra Inteligente",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Bom dia Nádia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bom dia Pedro",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bom dia Eliezer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bom dia Compra Inteligente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "4b8a51dd-674b-417d-8c76-a665a461b298",
+  "meta": {
+    "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
+  },
+  "id": "wcQKLNYNn9fmhVT3fZhrJ",
+  "tags": []
+}

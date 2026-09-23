@@ -1,0 +1,803 @@
+{
+  "name": "AdGenerator_EvolutionAPI_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e6ff1ddb-9b20-4a9a-9eef-820785e47789",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1072,
+        464
+      ],
+      "id": "d39f855a-0f0b-4abd-8bba-547789fd0ce0",
+      "name": "Webhook",
+      "webhookId": "e6ff1ddb-9b20-4a9a-9eef-820785e47789"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62f02bb7-68d0-4899-a8b7-9c7fcba43de9",
+              "name": "session",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "10fee6eb-2796-45c8-b183-b437ef9c616a",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "e32344a2-84b5-45e6-bb0b-a5f326fb6000",
+              "name": "pushName",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "3c09bc62-7b4d-4c46-a2b4-56181f7c38b0",
+              "name": "payload_id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f1187069-33bd-4947-9a83-b6eddd77330a",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "8d013703-bec6-43b7-b421-2f1c581f4c4a",
+              "name": "message",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "29fb29d2-f8b1-4a03-97ae-7e9da33739b2",
+              "name": "fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7fad1054-d810-48a7-a23d-c0d2657cfa18",
+              "name": "source",
+              "value": "={{ $json.body.data.source }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        464
+      ],
+      "id": "59c10271-156e-44fd-b8ec-f387e3f0a259",
+      "name": "Mapear Campos",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $('Mapear Campos').first().json.message || '';\nconst urls = text.match(/(https?:\\/\\/[^\\s]+)/g) || [];\nlet cupom = null;\nconst cupomMatch = text.match(/\\b(?:cupom|codigo|código)\\s*:?\\s*([a-z0-9\\-]+)/i);\nif (cupomMatch && cupomMatch[1]) cupom = cupomMatch[1].toUpperCase();\n\nlet desconto = null;\nconst percentMatch = text.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);\nif (percentMatch) desconto = percentMatch[1] + \"%\";\nelse {\n  const numberMatch = text.match(/\\b(?:desconto|off|descontar|desc)\\s*(\\d+(?:[.,]\\d+)?)/i);\n  if (numberMatch) desconto = parseFloat(numberMatch[1].replace(\",\", \".\"));\n}\n\nreturn urls.map(url => ({\n    json: {\n        url,\n        cupom,\n        desconto,\n        chatId: $('Mapear Campos').first().json.chatId,\n        instance: $('Mapear Campos').first().json.session\n    }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        464
+      ],
+      "id": "e40d8089-705a-42bb-83ff-c2b7cc17cdf5",
+      "name": "Extrair links do Agendamento"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "✅ Links recebidos e agendados com sucesso para disparos automáticos!",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        464
+      ],
+      "id": "737973bc-460c-4ba4-a7bc-2ae9cc95081e",
+      "name": "Notificar Agendamento",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8-20/2 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1072,
+        848
+      ],
+      "id": "e8d57b94-1348-4976-9fdd-e7465e6ef9e1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.id}}",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "id": "342ab046-cbba-4936-a73a-246508e57f94"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        848
+      ],
+      "id": "53d109b5-ecbe-440f-9a0e-1901cc44b5a5",
+      "name": "Tem Agendamentos?"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -416,
+        832
+      ],
+      "id": "2443a23c-f921-44b4-8de2-ca5fdf49f170",
+      "name": "Loop de Agendamentos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://scraper:8000/scrape",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -160,
+        784
+      ],
+      "id": "19418811-4c94-4060-abcb-d7fe019851b2",
+      "name": "Scraper Cron"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst original = $('Loop de Agendamentos').item.json;\nreturn {\n   json: {\n      ...item,\n      id_agendamento: original.id,\n      cupom: original.cupom,\n      desconto: original.desconto,\n      url: original.url,\n      chatId: original.chatId,\n      instance: original.instance\n   }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        784
+      ],
+      "id": "7e4ca4e0-6d09-42c3-8e57-6b21cd942b5f",
+      "name": "Merge Data"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        1024
+      ],
+      "id": "77acf359-3b93-4a1d-bcc5-b7260369a874",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        1216
+      ],
+      "id": "9cccc5a7-897d-4421-9aab-b54712dcb0fc",
+      "name": "Bot formatador modelo",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1RlyE2C4PjbBsPVB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE agendamentos SET status = 'sent' WHERE id = {{ $('Dividi as mensagens da IA').item.json.id_agendamento }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1328,
+        832
+      ],
+      "id": "a253a5cc-b9c3-4739-b638-10e361047eb8",
+      "name": "Atualizar Status Agendamento",
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO agendamentos (url, cupom, desconto, \"chatId\", instance, status) VALUES ('{{$json.url}}', '{{$json.cupom}}', '{{$json.desconto}}', '{{$json.chatId}}', '{{$json.instance}}', 'pending')",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -448,
+        464
+      ],
+      "id": "91039422-c456-4c55-93a8-b24e5e55f441",
+      "name": "Salvar Agendamento",
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction parseMoney(value) {\n\tif (!value) return 0;\n\treturn parseFloat(value.toString().replace(\"R$\", \"\").replace(/\\./g, \"\").replace(\",\", \".\").trim());\n}\nfunction formatBRL(value) {\n\treturn \"R$ \" + value.toFixed(2).replace(\".\", \",\").replace(/\\B(?=(\\d{3})+(?!\\d))/g, \".\");\n}\n\nlet items = $input.first().json.items || [];\nfor (let item of items) {\n    let rawDesconto = item.desconto;\n    let precoStr = item.preco_atual || '0';\n    let preco = parseMoney(precoStr);\n    let novoPreco = preco;\n\n    if (rawDesconto) {\n        let isPercent = false;\n        let valorDesconto = 0;\n        if (typeof rawDesconto === \"string\") {\n            let desc = rawDesconto.trim();\n            if (desc.includes(\"%\")) {\n                isPercent = true;\n                valorDesconto = parseFloat(desc.replace(\"%\", \"\").replace(\",\", \".\"));\n            } else {\n                valorDesconto = parseFloat(desc.replace(\",\", \".\"));\n            }\n        }\n        else if (typeof rawDesconto === \"number\") {\n            valorDesconto = rawDesconto;\n        }\n\n        if (!isNaN(valorDesconto)) {\n            if (isPercent) novoPreco = preco - (preco * valorDesconto / 100);\n            else novoPreco = preco - valorDesconto;\n        }\n    }\n    if (novoPreco < 0) novoPreco = 0;\n    item.preco_atual = formatBRL(novoPreco);\n}\nreturn [{ json: { items } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        1024
+      ],
+      "id": "b95e17be-2a7e-460c-9a1f-082eb6b3bebe",
+      "name": "Calc Desconto"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ACCEPTED_EXTENSIONS = ['jpg', 'jpeg', 'png'];\nlet items = $input.first().json.items || [];\nfor (const item of items) {\n  const imageUrl = item.imagem_url;\n  if (!imageUrl || typeof imageUrl !== 'string') {\n    item.imagem_url_converted = null;\n    continue;\n  }\n  const [baseUrl, queryString] = imageUrl.split('?');\n  const parts = baseUrl.split('.');\n  if (parts.length < 2) {\n    item.imagem_url_converted = imageUrl;\n    continue;\n  }\n  const currentExtension = parts.pop().toLowerCase();\n  if (ACCEPTED_EXTENSIONS.includes(currentExtension)) {\n    item.imagem_url_converted = imageUrl;\n  } else {\n    const newBaseUrl = [...parts, 'jpg'].join('.');\n    item.imagem_url_converted = queryString ? `${newBaseUrl}?${queryString}` : newBaseUrl;\n  }\n}\nreturn [{ json: { items } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        1024
+      ],
+      "id": "d9f9b69d-a03a-4670-8518-959f19d4f8ad",
+      "name": "Normaliza URL Imagem"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM agendamentos WHERE status = 'pending' AND DATE(\"createdAt\") = CURRENT_DATE ORDER BY \"createdAt\" ASC LIMIT 10;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -880,
+        848
+      ],
+      "id": "a78c8d89-348c-4c1b-a860-44412fd459ac",
+      "name": "Buscar links agendados",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        1024
+      ],
+      "id": "4b589ade-74d6-43a4-ae97-f416fc27a678",
+      "name": "Loop envio mensagens"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "={{ $json.instance }}",
+        "remoteJid": "={{ $json.chatId }}",
+        "media": "={{ $json.imagem_url_converted }}",
+        "caption": "={{ $json.texto_formatado }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        1024
+      ],
+      "id": "0c3f8b3c-ae41-4fcd-ae4c-182bd339cc4d",
+      "name": "Enviar imagem loop",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $json.data.instanceId }}",
+        "remoteJid": "={{ $json.data.key.remoteJid }}",
+        "messageText": "={{ $json.data.message.imageMessage.caption }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        1248
+      ],
+      "id": "f346d13a-759d-47f5-903f-e38547ece109",
+      "name": "Enviar texto loop",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || '';\n\ntext = text\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed_array = [];\n\ntry {\n  parsed_array = JSON.parse(text);\n} catch (e) {\n  parsed_array = [];\n}\n\n// garante que os campos existem (opcional, mas recomendado)\nparsed_array = parsed_array.map(item => ({\n  texto_formatado: item.texto_formatado || '',\n  chatId: item.chatId || null,\n  instance: item.instance || null,\n  imagem_url_converted: item.imagem_url_converted || null,\n  id_agendamento: item.id_agendamento || null\n}));\n\nreturn parsed_array.map(item => ({\n  json: item\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        1024
+      ],
+      "id": "9f25af04-c471-4796-bc56-1bb8601d54d6",
+      "name": "Parse na saida da IA"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.items) }}",
+        "options": {
+          "systemMessage": "INSTRUÇÃO:\n\nPasse como atributo, selhante ao texto_formatado o id_agendamento, chatId, Instance e imagem_url_converted\n\nVocê é um formatador de mensagens para ofertas. \nFormate cada elemento deste array JSON individualmente e retorne uma lista de dados incluindo os textos prontos e referências das imagens de forma estruturada (JSON array).\nO retorno DEVE ser um array JSON válido sem blocos de markdown.\n\n[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nA descrição do produto deverá conter até 10 palavras no máximo, não podendo conter palavras repetidas e virgulas, a informação deve ser a melhor possivel.\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, você vai criar uma frase para atrair os clientes de no máximo 6 palavras. Substituir o caracter ! (exclamação), pelo emoji ❗. Gere uma frase inteligente e que faça sentido na lingua portuguesa, que cative e desperte o interesse no cliente. Não use apelação do tipo 'compre agora', 'troque agora' ou algo semelhante. A frase deve ser seguida de um emoji que faça sentido com o contexto da frase e com a descrição do produto. O tom da frase deve ser engraçado, divertido, criativo e cativante, relacionando o produto com a necessidade do cliente, a fim de fazer a pessoa comprar o produto, qual a necessidade que aquele produto atende que faria a pessoa comprar.\nA frase não pode ter conteúdo de cunho sexual ou que desperte sensualidade, como por exemplo, empina bumbum, bumbum durinho, silhueta ou qualquer outra palavra de contexto sexual. \nFRASE MARKETEIRA SEMPRE EM UPPERCASE (MAIÚSCULA)\n\nQuando o cupom for null não inserir a linha cupom na mensagem formatada. \n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nCupom: {{ $('Tem URL?').item.json.cupom }} \nLink: {{ $json.url }}\n\n]\n\nPara cada produto no array, crie o \"texto_formatado\" seguindo esta estrutura OBRIGATÓRIA:\n\nFORMATO OBRIGATÓRIO DA SAÍDA\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n*{FRASE_MARKETEIRA}* (negrito) \n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🏷️ Cupom: `{{Cupom}}` ⚠️ (só o texto do cupom entre crases ``)\n\n🛒 LINK DA COMPRA: (negrito, não esqueça esse negrito)\n👉🏼 {{Link}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        432,
+        1024
+      ],
+      "id": "11addd6e-4c43-4b22-a372-c2eae0fcadcd",
+      "name": "IA formatadora agenda"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "texto_formatado, id_agendamento, chatId, instance, imagem_url_converted",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        912,
+        1024
+      ],
+      "id": "122e6611-7fbf-4e59-a7df-7a104b795443",
+      "name": "Dividi as mensagens da IA"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        1024
+      ],
+      "id": "cda81f5d-bbcd-4b1c-b05f-513c97c66ed2",
+      "name": "Delay",
+      "webhookId": "e6915b2f-4812-4b4b-b5ea-946801172b85"
+    },
+    {
+      "parameters": {
+        "jsCode": "await new Promise(r => setTimeout(r, 3000));\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        784
+      ],
+      "id": "07109fa7-c1ed-40ed-9a02-0302e88b514f",
+      "name": "Delay scrape"
+    },
+    {
+      "parameters": {
+        "content": "## EXPRESSÃO CRON\n\n### 48 20 * * *\n\n### 0 8-20/2 * * *",
+        "height": 176,
+        "width": 246
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1104,
+        1040
+      ],
+      "typeVersion": 1,
+      "id": "89244f97-2863-438d-8d16-90c6afad26fb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        464
+      ],
+      "id": "c5866d95-f152-49e7-88c6-647d7589e1ec",
+      "name": "Delay resposta",
+      "webhookId": "fcc97738-c329-40a9-9a25-77da987f9664"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Mapear Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Campos": {
+      "main": [
+        [
+          {
+            "node": "Extrair links do Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair links do Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Salvar Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar links agendados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Agendamentos?": {
+      "main": [
+        [
+          {
+            "node": "Loop de Agendamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop de Agendamentos": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scraper Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scraper Cron": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Delay scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Calc Desconto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador modelo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA formatadora agenda",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Delay resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calc Desconto": {
+      "main": [
+        [
+          {
+            "node": "Normaliza URL Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza URL Imagem": {
+      "main": [
+        [
+          {
+            "node": "IA formatadora agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar links agendados": {
+      "main": [
+        [
+          {
+            "node": "Tem Agendamentos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop envio mensagens": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar imagem loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar imagem loop": {
+      "main": [
+        [
+          {
+            "node": "Delay",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto loop": {
+      "main": [
+        []
+      ]
+    },
+    "Parse na saida da IA": {
+      "main": [
+        [
+          {
+            "node": "Dividi as mensagens da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Status Agendamento": {
+      "main": [
+        []
+      ]
+    },
+    "IA formatadora agenda": {
+      "main": [
+        [
+          {
+            "node": "Parse na saida da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividi as mensagens da IA": {
+      "main": [
+        [
+          {
+            "node": "Loop envio mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay": {
+      "main": [
+        [
+          {
+            "node": "Loop envio mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay scrape": {
+      "main": [
+        [
+          {
+            "node": "Loop de Agendamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay resposta": {
+      "main": [
+        [
+          {
+            "node": "Notificar Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "5fd1beaa-b294-48b4-af2f-fa736509e39b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
+  },
+  "id": "qXkRWyuNDFApfePa",
+  "tags": []
+}

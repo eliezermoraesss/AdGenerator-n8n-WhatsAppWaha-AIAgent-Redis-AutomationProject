@@ -1,7 +1,7 @@
 services:
   evolution-api:
     container_name: evolution_api
-    image: evoapicloud/evolution-api:v2.3.2
+    image: evoapicloud/evolution-api:latest
     restart: always
     depends_on:
       - redis-evolution
@@ -81,7 +81,7 @@ services:
     image: devlikeapro/waha:latest
     platform: linux/amd64
     environment:
-      WHATSAPP_HOOK_URL: https://nonresidential-commemoratively-amal.ngrok-free.dev:5678/webhook/webhook
+      WHATSAPP_HOOK_URL: https://aerodynamically-bibliomaniacal-mervin.ngrok-free.dev:5678/webhook/webhook
       WHATSAPP_DEFAULT_ENGINE: GOWS
       WHATSAPP_HOOK_EVENTS: message
       WAHA_NO_API_KEY: true
@@ -109,8 +109,8 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - WEBHOOK_URL=https://nonresidential-commemoratively-amal.ngrok-free.dev
-      - N8N_HOST=nonresidential-commemoratively-amal.ngrok-free.dev
+      - WEBHOOK_URL=https://aerodynamically-bibliomaniacal-mervin.ngrok-free.dev
+      - N8N_HOST=aerodynamically-bibliomaniacal-mervin.ngrok-free.dev
       - N8N_PROTOCOL=https
       - N8N_PORT=5678
       - GENERIC_TIMEZONE=America/Sao_Paulo

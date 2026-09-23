@@ -1,0 +1,98 @@
+CREATE TABLE IF NOT EXISTS agendamentos (
+   id SERIAL PRIMARY KEY,
+   url TEXT unique NOT NULL,
+   cupom TEXT,
+   desconto TEXT,
+   chatId TEXT,
+   instance TEXT,
+   createdAt TIMESTAMPTZ DEFAULT NOW(),
+   status VARCHAR(20) DEFAULT 'pending'
+);
+
+CREATE TABLE IF NOT EXISTS agendamentos_test (
+   id SERIAL PRIMARY KEY,
+   url TEXT unique NOT NULL,
+   cupom TEXT,
+   desconto TEXT,
+   chatId TEXT,
+   instance TEXT,
+   createdAt TIMESTAMPTZ DEFAULT NOW(),
+   status VARCHAR(20) DEFAULT 'pending'
+);
+
+CREATE TABLE IF NOT EXISTS historico_agendamentos (
+   id SERIAL PRIMARY KEY,
+   url TEXT unique NOT NULL,
+   cupom TEXT,
+   desconto TEXT,
+   chatId TEXT,
+   instance TEXT,
+   createdAt TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.agendamentos RENAME COLUMN chatid TO "chatId";
+
+ALTER TABLE public.agendamentos RENAME COLUMN createdat TO "createdAt";
+
+ALTER TABLE public.historico_agendamentos RENAME COLUMN chatid TO "chatId";
+
+ALTER TABLE public.historico_agendamentos RENAME COLUMN createdat TO "createdAt";
+
+ALTER TABLE public.agendamentos_test RENAME COLUMN chatid TO "chatId";
+
+ALTER TABLE public.agendamentos_test RENAME COLUMN createdat TO "createdAt";
+
+drop table agendamentos
+
+drop table historico_agendamentos
+
+select * from agendamentos where status = 'pending'
+
+select * from historico_agendamentos order by id desc
+
+DELETE FROM public.agendamentos
+
+DELETE FROM public.historico_agendamentos
+
+DELETE FROM public.agendamentos_test
+
+select * from agendamentos_test
+
+SELECT * FROM agendamentos WHERE status = 'pending' and DATE("createdAt") <> CURRENT_DATE;
+
+delete from agendamentos WHERE status = 'pending' and DATE("createdAt") <> CURRENT_DATE;
+
+SELECT * FROM agendamentos WHERE status = 'pending' AND DATE("createdAt") = CURRENT_DATE ORDER BY "createdAt" ASC LIMIT 10;
+
+delete from agendamentos where id = 155
+
+SELECT * FROM agendamentos WHERE status = 'pending' AND DATE("createdAt") = CURRENT_DATE ORDER BY "createdAt" ASC LIMIT 5;
+
+ALTER TABLE agendamentos
+ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ
+USING "createdAt" AT TIME ZONE 'America/Sao_Paulo';
+
+ALTER TABLE historico_agendamentos
+ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ
+USING "createdAt" AT TIME ZONE 'America/Sao_Paulo';
+
+ALTER TABLE agendamentos_test
+ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ
+USING "createdAt" AT TIME ZONE 'America/Sao_Paulo';
+
+SELECT 
+  "createdAt",
+  TO_CHAR("createdAt", 'YYYY-MM-DD HH24:MI:SS TZ') as formatado
+FROM agendamentos;
+
+SELECT * 
+FROM agendamentos 
+WHERE status = 'pending'
+AND "createdAt" >= CURRENT_DATE
+AND "createdAt" < CURRENT_DATE + INTERVAL '1 day'
+ORDER BY "createdAt" ASC
+LIMIT 5;
+
+SELECT * FROM agendamentos WHERE status = 'pending' AND DATE("createdAt") = CURRENT_DATE ORDER BY "createdAt" ASC LIMIT 3;
+
+SELECT COUNT(*) FROM agendamentos WHERE status = 'pending' AND DATE("createdAt") = CURRENT_DATE;

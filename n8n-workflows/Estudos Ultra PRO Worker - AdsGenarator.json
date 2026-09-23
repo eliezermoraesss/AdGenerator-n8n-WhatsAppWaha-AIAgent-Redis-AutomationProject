@@ -1,0 +1,48 @@
+{
+  "name": "ULTRA PRO - WORKER",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "amount": "={{Math.floor(Math.random()*4)+5}}",
+        "unit": "seconds"
+      },
+      "id": "delay",
+      "name": "Delay Random",
+      "type": "n8n-nodes-base.wait",
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://scraper:3000",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "{\"url\":\"={{$json.url}}\"}"
+      },
+      "id": "scraper",
+      "name": "Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "mode": "collectAllItems"
+      },
+      "id": "aggregate",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Start": { "main": [[{ "node": "Delay Random" }]] },
+    "Delay Random": { "main": [[{ "node": "Scraper" }]] },
+    "Scraper": { "main": [[{ "node": "Aggregate" }]] }
+  }
+}

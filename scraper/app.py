@@ -5,7 +5,7 @@ import re
 app = FastAPI()
 
 def is_amazon(url):
-    return "amazon." in url or "amzn." in url
+    return "amazon." in url or "amzn." in url or "link.amazon" in url
 
 def is_mercado_livre(url):
     return "mercadolivre" in url or "meli.la" in url

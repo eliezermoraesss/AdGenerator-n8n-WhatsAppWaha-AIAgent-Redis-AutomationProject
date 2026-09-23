@@ -1,0 +1,1505 @@
+{
+  "name": "AdGenerator_EvolutionAPI_Pilot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7be12d5a-fead-44c9-a140-e6b7f51a99a4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1312,
+        -144
+      ],
+      "id": "a9b933f0-9e99-4577-a523-657247265c77",
+      "name": "Webhook",
+      "webhookId": "7be12d5a-fead-44c9-a140-e6b7f51a99a4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.titulo }}{{ $json.preco_anterior }}{{ $json.preco_atual }}{{ $('Montar JSON').item.json.cupom }}{{ $json.url }}",
+        "options": {
+          "systemMessage": "[Você é um bot formatador de mensagens para ofertas que serão enviadas pelo WhatsApp e Telegram.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nA descrição do produto deverá conter até 10 palavras no máximo, não podendo conter palavras repetidas e virgulas, a informação deve ser a melhor possivel.\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, você vai criar uma frase para atrair os clientes de no máximo 5 palavras. Substituir o caracter ! (exclamação), pelo emoji ❗. Gere uma frase que cative e desperte o interesse no cliente. Não use apelação do tipo 'compre agora', 'troque agora' ou algo semelhante. A frase deve ser seguida de um emoji que faça sentido com o contexto da frase e com a descrição do produto. O tom da frase deve ser engraçado, divertido, criativo e cativante, relacionando o produto com a necessidade do cliente, a fim de fazer a pessoa comprar o produto, qual a necessidade que aquele produto atende que faria a pessoa comprar.\nA frase não pode ter conteúdo de cunho sexual ou que desperte sensualidade, como por exemplo, empina bumbum, bumbum durinho, silhueta ou qualquer outra palavra de contexto sexual. \nFRASE MARKETEIRA SEMPRE EM UPPERCASE (MAIÚSCULA)\n\nQuando o cupom for null não inserir a linha cupom na mensagem formatada. \n\nProduto: {{ $json.titulo }}\nPreço anterior: {{ $json.preco_anterior }}\nPreço atual: {{ $json.preco_atual }}\nCupom: {{ $('Tem URL?').item.json.cupom }} \nLink: {{ $json.url }}\n\n]\n\nFORMATO OBRIGATÓRIO DA SAÍDA\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA} (negrito)\n\n{{Produto}} (negrito)\n\n💰 De {{Preço anterior}} (tachado somente nos números)\n\n✅ Por {{Preço atual}} (negrito)\n\n🏷️ Cupom: `{{Cupom}}` ⚠️ (só o texto do cupom entre crases ``)\n\n🛒 LINK DA COMPRA: (negrito, não esqueça esse negrito)\n👉🏼 {{Link}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        -352
+      ],
+      "id": "563b6ab1-4237-48e0-9b99-effc1de6077e",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
+        "sessionTTL": 300,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        848,
+        -128
+      ],
+      "id": "3d68fc12-6425-48ab-b5ef-c097c0f7efb5",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "1coLtYvhIy1N8SCA",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62f02bb7-68d0-4899-a8b7-9c7fcba43de9",
+              "name": "session",
+              "value": "={{ $json.body.data.instanceId }}",
+              "type": "string"
+            },
+            {
+              "id": "10fee6eb-2796-45c8-b183-b437ef9c616a",
+              "name": "chatId",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "e32344a2-84b5-45e6-bb0b-a5f326fb6000",
+              "name": "pushName",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "3c09bc62-7b4d-4c46-a2b4-56181f7c38b0",
+              "name": "payload_id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f1187069-33bd-4947-9a83-b6eddd77330a",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "8d013703-bec6-43b7-b421-2f1c581f4c4a",
+              "name": "message",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "29fb29d2-f8b1-4a03-97ae-7e9da33739b2",
+              "name": "fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7fad1054-d810-48a7-a23d-c0d2657cfa18",
+              "name": "source",
+              "value": "={{ $json.body.data.source }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1136,
+        -144
+      ],
+      "id": "1e7eace0-f5dc-4312-8a0f-51c330bfc541",
+      "name": "Mapear Campos",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "949a5d2b-1d98-4091-81c8-d87c952aefa5",
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "messages.upsert",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -736,
+        -144
+      ],
+      "id": "1db65d8d-8b49-42ca-8d0a-84d760a41734",
+      "name": "Evento é mensagem?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://scraper:8000/scrape",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "68b5d756-e5d1-439c-88c0-23f246842d5a",
+      "name": "Fazer Webscrapping Playwright",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -160,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5a4d79c3-de7a-4962-bd58-0b6a37c9c92a",
+              "leftValue": "={{ $json.hasUrl }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "cefdb78c-f151-4bd1-9620-4136873aae32",
+      "name": "Switch Tem URL válida?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.status }}{{ $json.error_type }}{{ $json.message }}{{ $json.url }}",
+        "options": {
+          "systemMessage": "=Você é um bot formatador de mensagens para ofertas e respostas automáticas que serão enviadas pelo WhatsApp e Telegram.\n\nREGRAS OBRIGATÓRIAS:\n- GARANTA que não tenha asterísco duplicado na mensagem final, ou seja, nos negritos (**) especificados.\n- Sempre responda de forma amigável, clara e profissional.\n- Nunca exponha erros técnicos internos, stack trace ou termos complexos.\n- Sempre enfatize que o produto do anúncio **pode não estar mais disponível**, usando negrito.\n- Nunca invente informações que não estejam nos dados de entrada.\n- Use linguagem simples e humana, adequada para WhatsApp e Telegram.\n- Quando ocorrer erro, ofereça uma alternativa (reenviar o link ou tentar novamente).\n\nOBJETIVO:\nTransformar dados técnicos de erro em uma mensagem amigável para o usuário final.\n\nDADOS DE ENTRADA:\nMensagem do erro: {{ $json.message }}\nURL do anúncio: {{ $json.url }}\nStatus: {{ $json.status }}\nTipo do erro: {{ $json.error_type }}\n\nCOMPORTAMENTO ESPERADO:\n- Se o status for \"error\", gere uma mensagem educada explicando que não foi possível acessar o anúncio no momento.\n- Caso o tipo do erro seja TIMEOUT, informe que a página demorou para responder.\n- Inclua sempre a URL recebida.\n- Inclua sempre o aviso em negrito de que o produto pode não estar mais disponível.\n- Finalize convidando o usuário a tentar novamente ou enviar outro link.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        112
+      ],
+      "id": "4825316c-451f-4463-ad89-7d3bada5806a",
+      "name": "AI Agent1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        352,
+        304
+      ],
+      "id": "23de1efa-c14e-4d38-8e08-69ab4c2c63d9",
+      "name": "Bot de resposta falhas",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1RlyE2C4PjbBsPVB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -96
+      ],
+      "id": "d58e67f9-0651-4520-b2dd-d54d4e8f48da",
+      "name": "Bot formatador de anúncios",
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1RlyE2C4PjbBsPVB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Mapear Campos').item.json.session }}\n{{ $('Mapear Campos').item.json.chatId }}",
+        "sessionTTL": 500
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        304
+      ],
+      "id": "1cf9e98f-f75b-40a2-91de-90d6084acaba",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "1coLtYvhIy1N8SCA",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fca88342-0fd7-4206-91b0-e29c07e9f08f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a1183647-7e8c-4fb9-b383-1284e51dbbab",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -160
+      ],
+      "id": "3977a8fb-368b-40c6-9f3d-dd281370fdf1",
+      "name": "Status do scraper"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "media": "={{ $('Normaliza URL da imagem para JPG').item.json.imagem_url_converted }}",
+        "caption": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        -336
+      ],
+      "id": "11441380-ee0f-42a9-8df9-a4201451efef",
+      "name": "Enviar imagem",
+      "retryOnFail": true,
+      "executeOnce": false,
+      "notesInFlow": false,
+      "maxTries": 2,
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a8390dab-2cda-4c59-985c-dda296a43740",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "web",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "1c808351-a017-41b6-8c95-0601852aa277",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "android",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "a31616f8-8ce8-41f9-8b49-50ead839e21c",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "ios",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -944,
+        -32
+      ],
+      "id": "9ee0a63a-3545-4449-ac32-ed70b6fe9b48",
+      "name": "Mensagem Evolution API?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ACCEPTED_EXTENSIONS = ['jpg', 'jpeg', 'png'];\n\nfor (const item of $input.all()) {\n  const imageUrl = item.json.imagem_url;\n\n  if (!imageUrl || typeof imageUrl !== 'string') {\n    item.json.imagem_url_converted = null;\n    continue;\n  }\n\n  // Separa URL base e query string\n  const [baseUrl, queryString] = imageUrl.split('?');\n\n  // Separa partes pelo ponto\n  const parts = baseUrl.split('.');\n\n  if (parts.length < 2) {\n    // URL sem extensão clara\n    item.json.imagem_url_converted = imageUrl;\n    continue;\n  }\n\n  const currentExtension = parts.pop().toLowerCase();\n\n  if (ACCEPTED_EXTENSIONS.includes(currentExtension)) {\n    // Já é um formato aceito pelo WhatsApp\n    item.json.imagem_url_converted = imageUrl;\n  } else {\n    // Força JPG\n    const newBaseUrl = [...parts, 'jpg'].join('.');\n    item.json.imagem_url_converted = queryString\n      ? `${newBaseUrl}?${queryString}`\n      : newBaseUrl;\n  }\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -160
+      ],
+      "id": "e3c9ea5c-1a02-49b5-a4e8-4443e091363b",
+      "name": "Normaliza URL da imagem para JPG"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        800,
+        112
+      ],
+      "id": "0e4a4a14-e4ed-4b69-8dac-345b04035fa1",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{\n`❌ Erro ao processar oferta\n\n📦 Produto: ${$json.titulo}\n💰 Preço: ${$json.preco_atual}\n🖼️ Imagem: ${$json.imagem_url_converted}\n🔗 Link: ${$json.url}\n\n⚠️ Erro:\n${$json.error}`\n}}\n",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        -128
+      ],
+      "id": "9f2fb1a4-1fff-4abf-b826-37480aee7371",
+      "name": "Enviar texto1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "={{ $('AI Agent').item.json.output }}\n⚠️ Erro: ${$json.error}` }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        -192
+      ],
+      "id": "ecd96e9c-2a5a-470c-aa30-825c887d582a",
+      "name": "Enviar texto2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text =\n  $json.body?.message ||\n  $json.message ||\n  $json.text ||\n  '';\n\n// Regex genérica para URLs\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = text.match(urlRegex);\n\n// Se não tiver URL\nif (!urls || urls.length === 0) {\n  return [\n    {\n      json: {\n        hasUrl: false,\n        cupom: null,\n        desconto: null\n      }\n    }\n  ];\n}\n\n// Domínios permitidos (afiliados)\nconst allowedPatterns = [\n  /^https?:\\/\\/(www\\.)?amzn\\.to\\/.+/i,\n  /^https?:\\/\\/(www\\.)?meli\\.la\\/.+/i,\n  /^https?:\\/\\/(www\\.)?mercadolivre\\.com\\/sec\\/.+/i,\n  /^https?:\\/\\/(www\\.)?amazon\\.com\\.br\\/dp\\/[A-Z0-9]+/i\n];\n\n// Procura URL válida\nconst validUrl = urls.find(url =>\n  allowedPatterns.some(pattern => pattern.test(url))\n);\n\n// 🔎 Detectar CUPOM\nlet cupom = null;\n\nconst cupomRegex = /\\b(?:cupom|codigo|código)\\s*:?\\s*([a-z0-9\\-]+)/i;\nconst cupomMatch = text.match(cupomRegex);\n\nif (cupomMatch && cupomMatch[1]) {\n  cupom = cupomMatch[1].toUpperCase();\n}\n\n// 🔎 Detectar DESCONTO\nlet desconto = null;\n\n// primeiro tenta percentual\nconst percentMatch = text.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);\n\nif (percentMatch) {\n  desconto = percentMatch[1] + \"%\";\n} else {\n  // tenta número solto (ex: \"desconto 12\")\n  const numberMatch = text.match(/\\b(?:desconto|off|descontar|desc)\\s*(\\d+(?:[.,]\\d+)?)/i);\n  if (numberMatch) {\n    desconto = parseFloat(numberMatch[1].replace(\",\", \".\"));\n  }\n}\n\n// Se não tiver URL válida\nif (!validUrl) {\n  return [\n    {\n      json: {\n        hasUrl: false,\n        cupom,\n        desconto\n      }\n    }\n  ];\n}\n\n// Retorno final\nreturn [\n  {\n    json: {\n      hasUrl: true,\n      url: validUrl,\n      cupom,\n      desconto\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        -144
+      ],
+      "id": "c6407772-e189-4eb8-8097-8510fd1f567d",
+      "name": "Montar JSON"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseMoney(value) {\n\tif (!value) return 0;\n\treturn parseFloat(\n\t\tvalue\n\t\t\t.toString()\n\t\t\t.replace(\"R$\", \"\")\n\t\t\t.replace(/\\./g, \"\")\n\t\t\t.replace(\",\", \".\")\n\t\t\t.trim()\n\t);\n}\n\nfunction formatBRL(value) {\n\treturn \"R$ \" + value\n\t\t.toFixed(2)\n\t\t.replace(\".\", \",\")\n\t\t.replace(/\\B(?=(\\d{3})+(?!\\d))/g, \".\");\n}\n\nconst descontoRaw = $('Montar JSON').first().json.desconto;\n\nfor (const item of $input.all()) {\n\tconst precoStr = item.json.preco_atual;\n\tconst preco = parseMoney(precoStr);\n\n\tlet novoPreco = preco;\n\n\tif (descontoRaw !== undefined && descontoRaw !== null && descontoRaw !== \"\") {\n\n\t\tlet isPercent = false;\n\t\tlet valorDesconto = 0;\n\n\t\t// 🔥 Se for STRING\n\t\tif (typeof descontoRaw === \"string\") {\n\t\t\tconst desc = descontoRaw.trim();\n\n\t\t\tif (desc.includes(\"%\")) {\n\t\t\t\tisPercent = true;\n\t\t\t\tvalorDesconto = parseFloat(desc.replace(\"%\", \"\").replace(\",\", \".\"));\n\t\t\t} else {\n\t\t\t\tvalorDesconto = parseFloat(desc.replace(\",\", \".\"));\n\t\t\t}\n\t\t}\n\n\t\t// 🔥 Se for NUMBER\n\t\telse if (typeof descontoRaw === \"number\") {\n\t\t\tvalorDesconto = descontoRaw;\n\t\t}\n\n\t\t// aplica regra\n\t\tif (!isNaN(valorDesconto)) {\n\t\t\tif (isPercent) {\n\t\t\t\tnovoPreco = preco - (preco * valorDesconto / 100);\n\t\t\t} else {\n\t\t\t\tnovoPreco = preco - valorDesconto;\n\t\t\t}\n\t\t}\n\t}\n\n\tif (novoPreco < 0) novoPreco = 0;\n\n\titem.json.preco_atual = formatBRL(novoPreco);\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -224
+      ],
+      "id": "bf9f8465-5a20-4ec3-8622-52ac6c057afa",
+      "name": "Calcular desconto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea7115a3-c081-4548-9fb1-bb59ea421d14",
+              "leftValue": "={{ $('Montar JSON').item.json.desconto }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -336
+      ],
+      "id": "09fdf42a-7bbe-44fb-966f-490b7d4c65f3",
+      "name": "Verificar desconto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "=/^agendar\\b.*/i",
+              "operator": {
+                "type": "string",
+                "operation": "regex",
+                "name": "filter.operator.regex"
+              },
+              "id": "3385d3cf-d331-4f8c-8818-fcbc77b13a91"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -960,
+        -304
+      ],
+      "id": "27c803c5-401d-4332-b877-983fc6ee5c9c",
+      "name": "Verifica Palavra Agendar"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst text = $json.message || '';\nconst urls = text.match(/(https?:\\/\\/[^\\s]+)/g) || [];\nlet cupom = null;\nconst cupomMatch = text.match(/\\b(?:cupom|codigo|código)\\s*:?\\s*([a-z0-9\\-]+)/i);\nif (cupomMatch && cupomMatch[1]) cupom = cupomMatch[1].toUpperCase();\n\nlet desconto = null;\nconst percentMatch = text.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);\nif (percentMatch) desconto = percentMatch[1] + \"%\";\nelse {\n  const numberMatch = text.match(/\\b(?:desconto|off|descontar|desc)\\s*(\\d+(?:[.,]\\d+)?)/i);\n  if (numberMatch) desconto = parseFloat(numberMatch[1].replace(\",\", \".\"));\n}\n\nreturn urls.map(url => ({\n    json: {\n        url,\n        cupom,\n        desconto,\n        chatId: $json.chatId,\n        instance: $json.session\n    }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        -400
+      ],
+      "id": "c99c63d7-19ba-484c-a7d0-25d8d3dd02d2",
+      "name": "Extrair links do Agendamento"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO agendamentos (url, cupom, desconto, \"chatId\", instance, status) VALUES ('{{$json.url}}', '{{$json.cupom}}', '{{$json.desconto}}', '{{$json.chatId}}', '{{$json.instance}}', 'pending') ON CONFLICT (url) DO NOTHING;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -464,
+        -400
+      ],
+      "id": "5229790b-2b03-4b4b-9c43-b4edebd3133d",
+      "name": "Salvar Agendamento no DB",
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "remoteJid": "={{ $('Mapear Campos').item.json.chatId }}",
+        "messageText": "✅ Links recebidos e agendados com sucesso para disparos automáticos!",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -400
+      ],
+      "id": "80c5c8e3-3371-42a5-bbaa-76d419d4046d",
+      "name": "Notificar Agendamento",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8-20 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1072,
+        656
+      ],
+      "id": "ee5c57ce-e534-4574-80c5-69f4cbee0b99",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM agendamentos WHERE status = 'pending' AND DATE(\"createdAt\") = CURRENT_DATE ORDER BY \"createdAt\" ASC LIMIT 5;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -848,
+        656
+      ],
+      "id": "ce90ab1e-37ef-4782-bd2b-ea2cfdbf4083",
+      "name": "Ler Pendentes do Dia",
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.id}}",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "id": "88bf2480-6e7b-458d-86e1-71afbbb18cdf"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -624,
+        784
+      ],
+      "id": "ad4579ae-e2bd-4186-98b2-174809824684",
+      "name": "Tem Agendamentos?"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -368,
+        656
+      ],
+      "id": "f3510cdb-6ee4-449e-aa85-1c384e69a087",
+      "name": "Loop de Agendamentos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://scraper:8000/scrape",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -128,
+        608
+      ],
+      "id": "470f9375-211c-4671-b5dd-2b0118e02635",
+      "name": "Scraper Cron"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $input.first().json;\nconst original = $('Loop de Agendamentos').item.json;\nreturn {\n   json: {\n      ...item,\n      id_agendamento: original.id,\n      cupom: original.cupom,\n      desconto: original.desconto,\n      url: original.url,\n      chatId: original.chatId,\n      instance: original.instance\n   }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        608
+      ],
+      "id": "3c5d955a-9df3-4a7e-a318-5e0b5dbb7ed4",
+      "name": "Merge Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        608
+      ],
+      "id": "ee4e8e5d-6fb6-4257-bf6e-8b0ad55e5994",
+      "name": "Espera 5s",
+      "webhookId": "ad56e59f-9c51-4d18-9d33-55d8e57f7f1a"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        832
+      ],
+      "id": "09003c3f-28c9-4b68-b25b-b0ed4cdc6675",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction parseMoney(value) {\n\tif (!value) return 0;\n\treturn parseFloat(value.toString().replace(\"R$\", \"\").replace(/\\./g, \"\").replace(\",\", \".\").trim());\n}\nfunction formatBRL(value) {\n\treturn \"R$ \" + value.toFixed(2).replace(\".\", \",\").replace(/\\B(?=(\\d{3})+(?!\\d))/g, \".\");\n}\n\nlet items = $input.first().json.items || [];\nfor (let item of items) {\n    let rawDesconto = item.desconto;\n    let precoStr = item.preco_atual || '0';\n    let preco = parseMoney(precoStr);\n    let novoPreco = preco;\n\n    if (rawDesconto) {\n        let isPercent = false;\n        let valorDesconto = 0;\n        if (typeof rawDesconto === \"string\") {\n            let desc = rawDesconto.trim();\n            if (desc.includes(\"%\")) {\n                isPercent = true;\n                valorDesconto = parseFloat(desc.replace(\"%\", \"\").replace(\",\", \".\"));\n            } else {\n                valorDesconto = parseFloat(desc.replace(\",\", \".\"));\n            }\n        }\n        else if (typeof rawDesconto === \"number\") {\n            valorDesconto = rawDesconto;\n        }\n\n        if (!isNaN(valorDesconto)) {\n            if (isPercent) novoPreco = preco - (preco * valorDesconto / 100);\n            else novoPreco = preco - valorDesconto;\n        }\n    }\n    if (novoPreco < 0) novoPreco = 0;\n    item.preco_atual = formatBRL(novoPreco);\n}\nreturn [{ json: { items } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        832
+      ],
+      "id": "2caf70f6-3854-43f2-a875-b62f730652e7",
+      "name": "Calc Lote"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ACCEPTED_EXTENSIONS = ['jpg', 'jpeg', 'png'];\nlet items = $input.first().json.items || [];\nfor (const item of items) {\n  const imageUrl = item.imagem_url;\n  if (!imageUrl || typeof imageUrl !== 'string') {\n    item.imagem_url_converted = null;\n    continue;\n  }\n  const [baseUrl, queryString] = imageUrl.split('?');\n  const parts = baseUrl.split('.');\n  if (parts.length < 2) {\n    item.imagem_url_converted = imageUrl;\n    continue;\n  }\n  const currentExtension = parts.pop().toLowerCase();\n  if (ACCEPTED_EXTENSIONS.includes(currentExtension)) {\n    item.imagem_url_converted = imageUrl;\n  } else {\n    const newBaseUrl = [...parts, 'jpg'].join('.');\n    item.imagem_url_converted = queryString ? `${newBaseUrl}?${queryString}` : newBaseUrl;\n  }\n}\nreturn [{ json: { items } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        800
+      ],
+      "id": "5fd88d29-f268-4250-bc53-87913107d08d",
+      "name": "Normaliza URL Cron"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "DADOS:\n{{ JSON.stringify($json.items) }}\n\nINSTRUÇÃO:\nVocê é um formatador de mensagens para ofertas. \nFormate cada elemento deste array JSON individualmente e retorne uma lista de dados incluindo os textos prontos e referências das imagens de forma estruturada (JSON array).\nO retorno DEVE ser um array JSON válido sem blocos de markdown.\n\nUse EXCLUSIVAMENTE os dados fornecidos abaixo.\nNão invente, não pesquise, não deduza, obedeça estas instruções, NÃO ALTERE URL, a url de entrada deve ser exatamente igual a URL de saída (da mensagem final formatada)\n\nA descrição do produto deverá conter até 10 palavras no máximo, não podendo conter palavras repetidas e virgulas, a informação deve ser a melhor possivel.\n\nO tachado é ~valor a ser tachado~, nunca coloque <s></s>\n\nRetorne SOMENTE a mensagem formatada.\n\nOnde for (negrito) GARANTA que não tenha dois asteriscos seguidos (**) na mensagem formatada final.\nExemplo: \n**Texto a ser negritado** (errado)\n*Texto negritado* (correto)\n\nNo lugar onde está escrito FRASE_MARKETEIRA, você será uma especialista de marketing digital e vendas, você vai criar uma frase para atrair os clientes de no máximo 5 palavras. Substituir o caracter ! (exclamação), pelo emoji ❗. Gere uma frase que cative e desperte o interesse no cliente. Não use apelação do tipo 'compre agora', 'troque agora' ou algo semelhante. A frase deve ser seguida de um emoji que faça sentido com o contexto da frase e com a descrição do produto. O tom da frase deve ser engraçado, divertido, criativo e cativante, relacionando o produto com a necessidade do cliente, a fim de fazer a pessoa comprar o produto, qual a necessidade que aquele produto atende que faria a pessoa comprar.\nA frase não pode ter conteúdo de cunho sexual ou que desperte sensualidade, como por exemplo, empina bumbum, bumbum durinho, silhueta ou qualquer outra palavra de contexto sexual. \nFRASE MARKETEIRA SEMPRE EM UPPERCASE (MAIÚSCULA)\n\nQuando o cupom for null não inserir a linha cupom na mensagem formatada. \n\nPara cada produto no array, crie o \"texto_formatado\" seguindo esta estrutura OBRIGATÓRIA:\n\n🔥 OFERTA IMPERDÍVEL 🔥\n\n{FRASE_MARKETEIRA CRIATIVA} (negrito)\n\n{Produto} (negrito, max 10 palavras)\n\n💰 De {Preço anterior} (tachado com ~)\n✅ Por {Preço atual} (negrito)\n🏷️ Cupom: `{Cupom}` ⚠️\n🛒 LINK DA COMPRA: (negrito)\n👉🏼 {Link}\n\nO array retornado deve conter objetos com as seguintes chaves copiadas do item original + o texto gerado:\n- \"texto_formatado\" (o texto que você montou)\n- \"imagem_url_converted\"\n- \"chatId\"\n- \"instance\"\n- \"id_agendamento\"\n",
+        "options": {
+          "systemMessage": "You are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        800
+      ],
+      "id": "7cccb8b3-5e47-46eb-a166-81b4dd176c06",
+      "name": "Bot formatador Cron",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        1008
+      ],
+      "id": "eb129ffb-2f4a-4fe6-8f98-891b8ebe3149",
+      "name": "Bot formatador modelo",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1RlyE2C4PjbBsPVB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "={{ $json.instance }}",
+        "remoteJid": "={{ $json.chatId }}",
+        "media": "={{ $json.imagem_url_converted }}",
+        "caption": "={{ $json.texto_formatado }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        672
+      ],
+      "id": "17cb8017-3d68-45ce-8427-32a88d94d9e1",
+      "name": "Enviar imagem cron",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $json.instance }}",
+        "remoteJid": "={{ $json.chatId }}",
+        "messageText": "={{ $json.texto_formatado }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        992
+      ],
+      "id": "dfa0631d-8219-4539-ba16-d895c188b543",
+      "name": "Enviar texto cron",
+      "credentials": {
+        "evolutionApi": {
+          "id": "EQxneV000GnP2JfI",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE agendamentos SET status = 'sent' WHERE id = {{$json.id_agendamento}};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1728,
+        672
+      ],
+      "id": "7f16c7e9-d643-4b5e-8da3-cc4865870249",
+      "name": "Att Status",
+      "credentials": {
+        "postgres": {
+          "id": "Bys8mOgvNWZAAnGu",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet text = $input.first().json.output || '';\ntext = text.replace(/```json/gi, '').replace(/```/g, '').trim();\nlet parsed_array = [];\ntry {\n  parsed_array = JSON.parse(text);\n} catch(e) {\n  parsed_array = [];\n}\nreturn [{ json: { parsed_array } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        672
+      ],
+      "id": "497d3083-d6be-45a1-b799-62e4edf7fd0a",
+      "name": "Parse AI Output"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "parsed_array",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        1168,
+        768
+      ],
+      "id": "2b38660d-a1f4-459f-9bd8-694b5f846192",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {
+    "Ler Pendentes do Dia": [
+      {
+        "json": {
+          "id": 1,
+          "url": "https://meli.la/1mnicMC",
+          "cupom": "null",
+          "desconto": "null",
+          "chatId": "5519981374137@s.whatsapp.net",
+          "instance": "4f84b56e-36a2-470f-8c3b-f4e646c1fe05",
+          "createdAt": "2026-04-21T19:55:23.817Z",
+          "status": "pending"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "id": 2,
+          "url": "https://meli.la/2b8hZgL",
+          "cupom": "null",
+          "desconto": "null",
+          "chatId": "5519981374137@s.whatsapp.net",
+          "instance": "4f84b56e-36a2-470f-8c3b-f4e646c1fe05",
+          "createdAt": "2026-04-21T19:55:23.817Z",
+          "status": "pending"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "id": 3,
+          "url": "https://meli.la/14fsikB",
+          "cupom": "null",
+          "desconto": "null",
+          "chatId": "5519981374137@s.whatsapp.net",
+          "instance": "4f84b56e-36a2-470f-8c3b-f4e646c1fe05",
+          "createdAt": "2026-04-21T19:55:23.817Z",
+          "status": "pending"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Mapear Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar imagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Campos": {
+      "main": [
+        [
+          {
+            "node": "Verifica Palavra Agendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento é mensagem?": {
+      "main": [
+        [
+          {
+            "node": "Montar JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fazer Webscrapping Playwright": {
+      "main": [
+        [
+          {
+            "node": "Normaliza URL da imagem para JPG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Tem URL válida?": {
+      "main": [
+        [
+          {
+            "node": "Fazer Webscrapping Playwright",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot de resposta falhas": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador de anúncios": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status do scraper": {
+      "main": [
+        [
+          {
+            "node": "Verificar desconto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Evolution API?": {
+      "main": [
+        [
+          {
+            "node": "Evento é mensagem?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza URL da imagem para JPG": {
+      "main": [
+        [
+          {
+            "node": "Status do scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar imagem": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Enviar texto2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar JSON": {
+      "main": [
+        [
+          {
+            "node": "Switch Tem URL válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular desconto": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar desconto": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calcular desconto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Palavra Agendar": {
+      "main": [
+        [
+          {
+            "node": "Extrair links do Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Extrair links do Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Salvar Agendamento no DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar Agendamento no DB": {
+      "main": [
+        [
+          {
+            "node": "Notificar Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Ler Pendentes do Dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Pendentes do Dia": {
+      "main": [
+        [
+          {
+            "node": "Loop de Agendamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Agendamentos?": {
+      "main": [
+        []
+      ]
+    },
+    "Loop de Agendamentos": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scraper Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scraper Cron": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Espera 5s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Espera 5s": {
+      "main": [
+        [
+          {
+            "node": "Loop de Agendamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Calc Lote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calc Lote": {
+      "main": [
+        [
+          {
+            "node": "Normaliza URL Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza URL Cron": {
+      "main": [
+        [
+          {
+            "node": "Bot formatador Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador Cron": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Enviar imagem cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar imagem cron": {
+      "main": [
+        [
+          {
+            "node": "Att Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto cron": {
+      "main": [
+        [
+          {
+            "node": "Att Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot formatador modelo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Bot formatador Cron",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2ba6704c-ee85-4c67-b0ef-3adc2b416f3e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e6a24315ab2eaf3c63ae9063c37dc032da24f45c18732d264b5ecb00e37d096f"
+  },
+  "id": "L8mB85J13X9R51t6nt_zR",
+  "tags": []
+}
