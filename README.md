@@ -1,4 +1,4 @@
-# N8N Waha Local - AD Generator Automation
+# N8N AD Generator Automation
 
 Documentação completa da automação de WhatsApp com n8n, Evolution API e web scraping para geração de anúncios.
 
